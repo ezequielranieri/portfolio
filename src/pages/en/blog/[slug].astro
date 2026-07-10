@@ -1,0 +1,5 @@
+---
+import BlogPostPage from "../../../components/BlogPostPage.astro";
+const { slug } = Astro.params;
+---
+<BlogPostPage slug={slug!} locale="en" />

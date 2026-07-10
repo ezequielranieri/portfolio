@@ -1,0 +1,50 @@
+---
+import "../styles/global.css";
+import NavBar from "../components/NavBar.astro";
+import type { Locale } from "../lib/i18n";
+
+interface Props {
+  title?: string;
+  description?: string;
+  locale?: Locale;
+  contentLang?: string;
+}
+
+const { title = "Ezequiel Ranieri — backend & security engineer", description = "Portfolio personal de un Backend & Security Engineer", locale = "es", contentLang } = Astro.props;
+
+const SITE_URL = process.env.SITE_URL || "";
+
+const currentPath = Astro.url.pathname;
+const altLocale: Locale = locale === "en" ? "es" : "en";
+const altPath = currentPath.replace(/^\/(en|es)\//, `/${altLocale}/`);
+
+const absUrl = (path: string) => (SITE_URL ? `${SITE_URL}${path}` : path);
+---
+
+<!doctype html>
+<html lang={contentLang || locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="alternate" hreflang={locale} href={absUrl(currentPath)} />
+    <link rel="alternate" hreflang={altLocale} href={absUrl(altPath)} />
+    <link rel="alternate" hreflang="x-default" href={absUrl("/es/")} />
+
+    <title>{title}</title>
+  </head>
+  <body>
+    <NavBar locale={locale} />
+    <slot />
+  </body>
+</html>

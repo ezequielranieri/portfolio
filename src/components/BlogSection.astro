@@ -1,0 +1,57 @@
+---
+import type { Locale } from "../lib/i18n";
+import { translations } from "../lib/i18n";
+import { getPosts } from "../lib/notion";
+
+export interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale].sections;
+const posts = await getPosts();
+const latest = posts.slice(0, 3);
+---
+
+<section id="blog" class="py-24 scroll-mt-14 sm:scroll-mt-16">
+  <h2 class="font-mono text-xs tracking-widest uppercase text-ink-dim mb-12">
+    {t.blogTitle}
+  </h2>
+
+  {latest.length > 0 ? (
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {latest.map((post) => (
+        <a
+          href={"/" + locale + "/blog/" + post.slug}
+          class="border border-line p-5 sm:p-6 flex flex-col h-full hover:bg-bg-raised transition-colors duration-150 group"
+        >
+          <div class="flex items-center gap-2 mb-3">
+            <time class="font-mono text-[11px] tracking-wider text-ink-dim">
+              {post.date}
+            </time>
+            <span class="w-px h-3 bg-line"></span>
+            <span class="font-mono text-[10px] tracking-widest uppercase text-ink-dim">{post.lang.toUpperCase()}</span>
+          </div>
+
+          <h3 class="font-display text-base tracking-tight text-ink group-hover:text-ink-dim transition-colors duration-150 uppercase mb-2">
+            {post.title}
+          </h3>
+
+          <p class="text-ink-dim text-sm leading-relaxed mb-4 flex-1">
+            {post.excerpt}
+          </p>
+
+          <div class="flex flex-wrap gap-2 mt-auto">
+            {post.tags.map((tag) => (
+              <span class="px-2 py-0.5 text-[10px] font-mono tracking-wider uppercase border border-line text-ink-dim">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </a>
+      ))}
+    </div>
+  ) : (
+    <p class="text-ink-dim">{t.blogPlaceholder}</p>
+  )}
+</section>

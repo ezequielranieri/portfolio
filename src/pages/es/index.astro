@@ -1,0 +1,22 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Hero from "../../components/Hero.astro";
+import ProjectsSection from "../../components/ProjectsSection.astro";
+import BlogSection from "../../components/BlogSection.astro";
+import ContactSection from "../../components/ContactSection.astro";
+import { translations } from "../../lib/i18n";
+
+const locale = "es";
+const t = translations[locale];
+---
+
+<Layout locale={locale} title="Ezequiel Ranieri — backend & security engineer" description="Portfolio personal de un Backend & Security Engineer">
+  <Hero locale={locale} />
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
+    <ProjectsSection locale={locale} />
+
+    <BlogSection locale={locale} />
+
+    <ContactSection locale={locale} />
+  </main>
+</Layout>

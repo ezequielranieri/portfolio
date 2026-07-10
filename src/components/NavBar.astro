@@ -1,0 +1,51 @@
+---
+import type { Locale } from "../lib/i18n";
+import { translations } from "../lib/i18n";
+
+export interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale];
+const other: Locale = locale === "en" ? "es" : "en";
+---
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-sm">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+    <a href={"/" + locale + "/"} class="font-mono text-xs tracking-widest uppercase text-ink hover:text-ink-dim transition-colors duration-150">
+      // er
+    </a>
+    <div class="flex items-center gap-6">
+      <ul class="flex items-center gap-6">
+        <li>
+          <a href={"/" + locale + "/#inicio"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
+            {t.nav.home}
+          </a>
+        </li>
+        <li>
+          <a href={"/" + locale + "/#proyectos"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
+            {t.nav.projects}
+          </a>
+        </li>
+        <li>
+          <a href={"/" + locale + "/#blog"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
+            {t.nav.blog}
+          </a>
+        </li>
+        <li>
+          <a href={"/" + locale + "/#contacto"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
+            {t.nav.contact}
+          </a>
+        </li>
+      </ul>
+      <span class="w-px h-4 bg-line"></span>
+      <a
+        href={"/" + other + "/"}
+        class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150"
+      >
+        {other === "en" ? "EN" : "ES"}
+      </a>
+    </div>
+  </div>
+</nav>

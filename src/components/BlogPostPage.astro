@@ -1,0 +1,66 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getPostBySlug } from "../lib/notion";
+import type { Locale } from "../lib/i18n";
+
+export interface Props {
+  slug: string;
+  locale: Locale;
+}
+
+const { slug, locale } = Astro.props;
+
+let post = null;
+try {
+  post = await getPostBySlug(slug);
+} catch {
+  post = null;
+}
+
+if (!post) {
+  return Astro.redirect("/" + locale + "/", 302);
+}
+
+const title = post.title + " — Ezequiel Ranieri";
+const desc = post.excerpt || post.title;
+const cover = post.cover || "";
+const tags = post.tags || [];
+const content = post.content || "";
+const date = post.date || "";
+const lang = post.lang || "es";
+---
+
+<Layout title={title} description={desc} locale={locale} contentLang={lang}>
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={desc} />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content={"/" + locale + "/blog/" + slug} />
+  {cover && <meta property="og:image" content={cover} />}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={desc} />
+  {cover && <meta name="twitter:image" content={cover} />}
+
+  <article class="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-24">
+    <nav class="mb-12">
+      <a href={"/" + locale + "/"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">← volver</a>
+    </nav>
+
+    <header class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <time class="font-mono text-xs tracking-wider text-ink-dim">{date}</time>
+        <span class="w-px h-3 bg-line"></span>
+        <span class="font-mono text-[10px] tracking-widest uppercase text-ink-dim">{lang.toUpperCase()}</span>
+        <span class="w-px h-3 bg-line"></span>
+        <div class="flex flex-wrap gap-2">
+          {tags.map((tag) => <span class="px-2 py-0.5 text-[10px] font-mono tracking-wider uppercase border border-line text-ink-dim">{tag}</span>)}
+        </div>
+      </div>
+      <h1 class="font-display text-3xl sm:text-4xl tracking-tight text-ink uppercase leading-[1.1]">{post.title}</h1>
+    </header>
+
+    {cover && <img src={cover} alt={post.title} class="w-full border border-line mb-10" loading="eager" />}
+
+    <div class="prose-custom">{content}</div>
+  </article>
+</Layout>

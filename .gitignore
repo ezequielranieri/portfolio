@@ -6,3 +6,4 @@ dist/
 AGENTS.md
 context.md
 .opencode/
+tina/__generated__/

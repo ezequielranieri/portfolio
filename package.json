@@ -3,17 +3,21 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "tinacms dev -c \"astro dev\"",
+    "build": "tinacms build && astro build",
+    "build:local": "tinacms build --skip-cloud-checks --skip-indexing && astro build",
     "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vercel": "^9.0.5",
-    "@notionhq/client": "^5.23.0",
     "@tailwindcss/vite": "^4.1.0",
+    "@tinacms/astro": "^0.5.1",
+    "@tinacms/cli": "^2.5.3",
     "astro": "^5.7.0",
-    "tailwindcss": "^4.1.0"
+    "marked": "^18.0.6",
+    "tailwindcss": "^4.1.0",
+    "tinacms": "^3.10.0"
   }
 }

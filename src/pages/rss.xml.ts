@@ -1,5 +1,5 @@
 import rss from "@astrojs/rss";
-import { getPosts } from "../lib/notion";
+import { getPosts } from "../lib/posts";
 
 export async function GET() {
   const posts = await getPosts();

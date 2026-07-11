@@ -31,7 +31,7 @@ const postSlugs = blogSlugs();
 
 export default defineConfig({
   site: SITE,
-  output: "static",
+  output: "server",
   adapter: vercel(),
   i18n: {
     defaultLocale: "es",

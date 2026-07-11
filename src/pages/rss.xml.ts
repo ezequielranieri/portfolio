@@ -1,6 +1,8 @@
 import rss from "@astrojs/rss";
 import { getPosts } from "../lib/posts";
 
+export const prerender = true;
+
 export async function GET() {
   const posts = await getPosts();
   const site = process.env.SITE_URL || "http://localhost:4321";

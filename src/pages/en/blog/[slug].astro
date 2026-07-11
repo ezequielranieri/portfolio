@@ -2,6 +2,8 @@
 import { getPostBySlug, getPosts } from "../../../lib/posts";
 import BlogPostPage from "../../../components/BlogPostPage.astro";
 
+export const prerender = true;
+
 export async function getStaticPaths() {
   const posts = await getPosts();
   return posts

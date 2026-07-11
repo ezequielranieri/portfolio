@@ -41,20 +41,21 @@ const s = translations[locale].nav;
   </div>
 
   <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-    <div class="w-5 h-8 border border-line rounded-none flex justify-center pt-2">
-      <div class="w-0.5 h-3 bg-ink-dim scroll-indicator-inner"></div>
+    <div class="w-5 h-8 border border-line rounded-none relative overflow-hidden">
+      <div class="scroll-indicator-inner absolute left-1/2 -translate-x-1/2 w-0.5 h-3 bg-ink-dim"></div>
     </div>
   </div>
 </section>
 
 <style>
   .scroll-indicator-inner {
+    top: 4px;
     animation: scroll-wheel 1.8s ease-in-out infinite;
   }
 
   @keyframes scroll-wheel {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(11px); }
+    0%, 100% { top: 4px; }
+    50% { top: 13px; }
   }
 
   @media (prefers-reduced-motion: reduce) {

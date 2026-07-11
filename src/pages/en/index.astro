@@ -6,13 +6,15 @@ import BlogSection from "../../components/BlogSection.astro";
 import ContactSection from "../../components/ContactSection.astro";
 import { translations } from "../../lib/i18n";
 
+export const prerender = true;
+
 const locale = "en";
 const t = translations[locale];
 ---
 
-<Layout locale={locale} title="Ezequiel Ranieri — backend & security engineer" description="Portfolio of a Backend & Security Engineer">
+<Layout locale={locale} title="Ezequiel Ranieri — Backend & Security Engineer" description="Portfolio of a Backend & Security Engineer">
   <Hero locale={locale} />
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
+  <main id="main-content" class="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
     <ProjectsSection locale={locale} />
 
     <BlogSection locale={locale} />

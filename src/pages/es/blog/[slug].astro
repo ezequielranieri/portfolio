@@ -1,5 +1,22 @@
 ---
+import { getPostBySlug, getPosts } from "../../../lib/posts";
 import BlogPostPage from "../../../components/BlogPostPage.astro";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts
+    .filter((p) => p.lang === "es")
+    .map((post) => ({
+      params: { slug: post.slug },
+      props: { slug: post.slug },
+    }));
+}
+
 const { slug } = Astro.params;
+const post = await getPostBySlug(slug!);
+
+if (!post) {
+  return Astro.redirect("/es/", 302);
+}
 ---
-<BlogPostPage slug={slug!} locale="es" />
+<BlogPostPage post={post} locale="es" />

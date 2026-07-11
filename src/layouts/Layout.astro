@@ -8,17 +8,19 @@ interface Props {
   description?: string;
   locale?: Locale;
   contentLang?: string;
+  localeToggleHref?: string;
 }
 
-const { title = "Ezequiel Ranieri — backend & security engineer", description = "Portfolio personal de un Backend & Security Engineer", locale = "es", contentLang } = Astro.props;
+const { title = "Ezequiel Ranieri — Backend & Security Engineer", description = "Portfolio personal de un Backend & Security Engineer", locale = "es", contentLang, localeToggleHref } = Astro.props;
 
-const SITE_URL = process.env.SITE_URL || "";
+const SITE_URL = process.env.SITE_URL || Astro.url.origin || "";
+const BASE_URL = SITE_URL.replace(/\/$/, "");
 
 const currentPath = Astro.url.pathname;
 const altLocale: Locale = locale === "en" ? "es" : "en";
 const altPath = currentPath.replace(/^\/(en|es)\//, `/${altLocale}/`);
 
-const absUrl = (path: string) => (SITE_URL ? `${SITE_URL}${path}` : path);
+const absUrl = (path: string) => `${BASE_URL}${path}`;
 ---
 
 <!doctype html>
@@ -42,9 +44,56 @@ const absUrl = (path: string) => (SITE_URL ? `${SITE_URL}${path}` : path);
     <link rel="alternate" hreflang="x-default" href={absUrl("/es/")} />
 
     <title>{title}</title>
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={absUrl(currentPath)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="canonical" href={absUrl(currentPath)} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Ezequiel Ranieri",
+      "url": absUrl("/"),
+      "jobTitle": "Backend & Security Engineer",
+      "sameAs": [
+        "https://github.com/ezequielranieri",
+        "https://www.linkedin.com/in/ezequielranieri",
+      ],
+    })}>
+    </script>
   </head>
   <body>
-    <NavBar locale={locale} />
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-bg focus:text-ink focus:border focus:border-line focus:outline-none">
+      {locale === "es" ? "Saltar al contenido" : "Skip to content"}
+    </a>
+    <NavBar locale={locale} localeToggleHref={localeToggleHref} />
     <slot />
+
+    <footer class="border-t border-line">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-center">
+        <a
+          href="https://github.com/ezequielranieri"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 font-mono text-xs tracking-wider text-ink-dim hover:text-ink transition-colors duration-150"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          Powered by Ezequiel Ranieri
+        </a>
+      </div>
+    </footer>
+
+    <script>
+      import { inject } from "@vercel/analytics";
+      inject();
+    </script>
   </body>
 </html>

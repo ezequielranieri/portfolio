@@ -1,5 +1,5 @@
 ---
-import NetworkField from "./NetworkField.astro";
+import TerminalField from "./TerminalField.astro";
 import type { Locale } from "../lib/i18n";
 import { translations } from "../lib/i18n";
 
@@ -13,7 +13,7 @@ const s = translations[locale].nav;
 ---
 
 <section id="inicio" class="relative min-h-screen flex items-center justify-center overflow-hidden scroll-mt-0">
-  <NetworkField />
+  <TerminalField />
   <div class="relative z-10 text-center px-4 sm:px-6">
     <p class="font-mono text-xs sm:text-sm tracking-widest uppercase text-ink-dim mb-6">
       {t.subtitle}
@@ -21,19 +21,19 @@ const s = translations[locale].nav;
     <h1 class="font-display text-[clamp(2.5rem,8vw,6rem)] leading-[0.9] tracking-tight text-ink select-none">
       EZEQUIEL<br />RANIERI
     </h1>
-    <p class="mt-6 max-w-md mx-auto text-ink-dim text-sm sm:text-base leading-relaxed">
+    <p class="mt-6 max-w-md mx-auto text-ink-dim text-sm sm:text-base leading-relaxed" style="color: var(--color-ink-dim);">
       {t.bio}
     </p>
     <div class="mt-10 flex flex-wrap gap-3 justify-center">
       <a
         href={"/" + locale + "/#proyectos"}
-        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider border border-line text-ink hover:bg-ink hover:text-bg transition-colors duration-150"
+        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider border border-line text-ink-dim hover:bg-ink hover:text-bg transition-colors duration-150"
       >
         {t.ctaProjects}
       </a>
       <a
         href={"/" + locale + "/#blog"}
-        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider border border-line text-ink-dim hover:text-ink transition-colors duration-150"
+        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider border border-line text-ink-dim hover:bg-ink hover:text-bg transition-colors duration-150"
       >
         {t.ctaBlog}
       </a>
@@ -42,7 +42,24 @@ const s = translations[locale].nav;
 
   <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
     <div class="w-5 h-8 border border-line rounded-none flex justify-center pt-2">
-      <div class="w-0.5 h-2 bg-ink-dim animate-pulse"></div>
+      <div class="w-0.5 h-3 bg-ink-dim scroll-indicator-inner"></div>
     </div>
   </div>
 </section>
+
+<style>
+  .scroll-indicator-inner {
+    animation: scroll-wheel 1.8s ease-in-out infinite;
+  }
+
+  @keyframes scroll-wheel {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(11px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-indicator-inner {
+      animation: none;
+    }
+  }
+</style>

@@ -21,9 +21,13 @@ export const translations = {
       blogTitle: "// blog",
       blogPlaceholder: "Coming soon.",
     },
+    blog: {
+      back: "← back",
+      readTranslation: "Read in Spanish →",
+    },
     contact: {
       contactTitle: "// contact",
-      contactPlaceholder: "Links de contacto reales (GitHub, LinkedIn, email) pendientes de que Ezequiel los provea.",
+      email: "Email",
     },
   },
   es: {
@@ -45,9 +49,13 @@ export const translations = {
       blogTitle: "// blog",
       blogPlaceholder: "Próximamente.",
     },
+    blog: {
+      back: "← volver",
+      readTranslation: "Leer en inglés →",
+    },
     contact: {
       contactTitle: "// contacto",
-      contactPlaceholder: "Links de contacto reales (GitHub, LinkedIn, email) pendientes de que Ezequiel los provea.",
+      email: "Email",
     },
   },
 } as const;

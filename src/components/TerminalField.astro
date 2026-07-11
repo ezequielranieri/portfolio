@@ -1,0 +1,130 @@
+<div id="terminal-field" aria-hidden="true" style="position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;">
+  <div id="terminal-lines" class="font-mono text-xs leading-[1.6]"></div>
+</div>
+
+<script is:inline>
+  (() => {
+    const container = document.getElementById("terminal-lines");
+    if (!container) return;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const lines = [
+      "$ openssl rand -hex 32",
+      "> POST /auth/token 200 OK",
+      "$ docker ps",
+      "$ curl -X POST /api/verify",
+      "> token rotated \u2713",
+      "$ redis-cli ping",
+      "> PONG",
+      "$ kubectl get pods",
+      "> 12 running",
+      "$ ssh -i key.pem deploy@host",
+      "> Connected \u2713",
+    ];
+
+    if (prefersReduced) {
+      for (const line of lines) {
+        const p = document.createElement("p");
+        p.textContent = line;
+        container.appendChild(p);
+      }
+      return;
+    }
+
+    const MAX_VISIBLE = 20;
+    let lineIndex = 0;
+    let charIndex = 0;
+    let isPaused = false;
+    let currentEl = null;
+    let timeoutId = null;
+
+    function addLine() {
+      const el = document.createElement("p");
+      el.classList.add("active");
+      container.appendChild(el);
+      while (container.children.length > MAX_VISIBLE) {
+        container.removeChild(container.firstChild);
+      }
+      return el;
+    }
+
+    function completeLine(el) {
+      el.classList.remove("active");
+    }
+
+    function tick() {
+      if (isPaused) return;
+
+      if (!currentEl) {
+        currentEl = addLine();
+      }
+
+      const line = lines[lineIndex];
+
+      if (charIndex === 0) {
+        currentEl.textContent = "";
+      }
+
+      if (charIndex < line.length) {
+        currentEl.textContent = line.slice(0, charIndex + 1) + "\u007C";
+        charIndex++;
+        scheduleTick(30 + Math.random() * 50);
+      } else {
+        currentEl.textContent = line;
+        if (currentEl) completeLine(currentEl);
+        lineIndex = (lineIndex + 1) % lines.length;
+        charIndex = 0;
+        currentEl = null;
+        scheduleTick(600 + Math.random() * 400);
+      }
+    }
+
+    function scheduleTick(delay) {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(tick, delay);
+    }
+
+    scheduleTick(500);
+  })();
+</script>
+
+<style is:global>
+  #terminal-lines {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--color-ink);
+    user-select: none;
+  }
+
+  #terminal-lines p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.12;
+    transition: opacity 0.4s ease;
+  }
+
+  #terminal-lines p.active {
+    opacity: 0.28;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #terminal-field {
+      opacity: 0.08 !important;
+    }
+    #terminal-lines p {
+      opacity: 1 !important;
+      transition: none !important;
+    }
+    #terminal-lines p.active {
+      opacity: 1 !important;
+    }
+  }
+</style>

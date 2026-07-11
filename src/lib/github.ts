@@ -14,10 +14,17 @@ type Override = {
 const MANUAL_OVERRIDES: Record<string, Override> = {
   "hex-auth-service": {
     description: {
-      en: "High-performance IAM service with hexagonal architecture, O(1) token validation, refresh token rotation, rate limiting, and real-time security monitoring.",
-      es: "Servicio IAM de alto rendimiento con arquitectura hexagonal, validación de tokens O(1), rotación de refresh tokens, rate limiting y monitoreo de seguridad en tiempo real.",
+      en: "High-performance IAM solution with Hexagonal Architecture (Ports & Adapters). O(1) token validation via Redis, Refresh Token Rotation, and real-time breach detection.",
+      es: "Solución IAM de alto rendimiento con arquitectura hexagonal (Ports & Adapters). Validación de tokens O(1) vía Redis, Refresh Token Rotation, y detección de breach en tiempo real.",
     },
-    stack: ["Python", "FastAPI", "Redis"],
+    stack: ["Python", "FastAPI", "PostgreSQL", "Redis"],
+  },
+  "go-iam-service": {
+    description: {
+      en: "Performance-first authentication and identity service built as a modular monolith with Clean Architecture. Includes refresh token rotation with breach detection, Lua/Redis rate limiting, and full observability (Prometheus metrics, structured logging).",
+      es: "Servicio de autenticación e identidad performance-first, construido como modular monolith con Clean Architecture. Incluye rotación de refresh tokens con detección de breach, rate limiting con Lua/Redis, y observabilidad completa (métricas Prometheus, structured logging).",
+    },
+    stack: ["Go", "PostgreSQL", "Redis", "JWT"],
   },
   "high-performance-task-queue": {
     description: {
@@ -33,18 +40,32 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Python", "Polars"],
   },
+  "flowcore": {
+    description: {
+      en: "Distributed, durable, and observable workflow engine. Supports the Saga pattern with automatic compensations, workflow versioning, multi-tenancy, and worker failure recovery.",
+      es: "Motor de workflows distribuido, durable y observable. Soporta patrón Saga con compensaciones automáticas, versioning de workflows, multi-tenancy, y recuperación ante fallos de workers.",
+    },
+    stack: ["Python", "Celery", "RabbitMQ", "PostgreSQL"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);
 
 function placeholderProjects(): Project[] {
-  return DEFAULT_REPOS.map((name) => {
+  const user = process.env.GITHUB_USERNAME || "ezequielranieri";
+  const featured = process.env.GITHUB_FEATURED_REPOS;
+  let names = DEFAULT_REPOS;
+  if (featured) {
+    const filtered = featured.split(",").map((s) => s.trim());
+    names = filtered.filter((n) => DEFAULT_REPOS.includes(n));
+  }
+  return names.map((name) => {
     const o = MANUAL_OVERRIDES[name];
     return {
       name,
       description: o.description,
       stack: o.stack,
-      repoUrl: `https://github.com/${name}`,
+      repoUrl: `https://github.com/${user}/${name}`,
       stars: 0,
     };
   });

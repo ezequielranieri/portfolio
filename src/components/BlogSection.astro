@@ -9,47 +9,94 @@ export interface Props {
 
 const { locale } = Astro.props;
 const t = translations[locale].sections;
-const posts = await getPosts();
-const latest = posts.slice(0, 3);
+const allPosts = await getPosts();
+
+const postMap = new Map(allPosts.map((p) => [p.slug, p]));
+
+const paired = new Set<string>();
+for (const post of allPosts) {
+  if (post.translationOf && postMap.has(post.translationOf)) {
+    paired.add(post.slug);
+    paired.add(post.translationOf);
+  }
+}
+
+const covered = new Set<string>();
+type Group = { primary: (typeof allPosts)[0]; translation?: (typeof allPosts)[0] };
+const groups: Group[] = [];
+
+for (const post of allPosts) {
+  if (covered.has(post.slug)) continue;
+
+  if (paired.has(post.slug)) {
+    const otherSlug =
+      post.translationOf || allPosts.find((p) => p.translationOf === post.slug)?.slug;
+    const other = otherSlug ? postMap.get(otherSlug) : undefined;
+    if (other) {
+      covered.add(post.slug);
+      covered.add(other.slug);
+      const primary = post.lang === locale ? post : other.lang === locale ? other : post;
+      const translation = primary === post ? other : post;
+      groups.push({ primary, translation });
+    } else {
+      groups.push({ primary: post });
+    }
+  } else {
+    groups.push({ primary: post });
+  }
+}
+
+groups.sort(
+  (a, b) =>
+    new Date(b.primary.date).getTime() - new Date(a.primary.date).getTime(),
+);
+
+const latest = groups.slice(0, 3);
 ---
 
 <section id="blog" class="py-24 scroll-mt-14 sm:scroll-mt-16">
-  <h2 class="font-mono text-xs tracking-widest uppercase text-ink-dim mb-12">
+  <h2 class="section-heading font-mono text-xs tracking-widest uppercase text-ink-dim mb-12">
     {t.blogTitle}
   </h2>
 
   {latest.length > 0 ? (
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {latest.map((post) => (
+      {latest.map(({ primary, translation }) => {
+        const locales = [primary.lang];
+        if (translation) locales.push(translation.lang);
+        return (
         <a
-          href={"/" + locale + "/blog/" + post.slug}
-          class="border border-line p-5 sm:p-6 flex flex-col h-full hover:bg-bg-raised transition-colors duration-150 group"
+          href={"/" + primary.lang + "/blog/" + primary.slug}
+          class="border border-line p-5 sm:p-6 flex flex-col h-full hover:bg-bg-raised hover:-translate-y-0.5 transition duration-150 group"
         >
           <div class="flex items-center gap-2 mb-3">
-            <time class="font-mono text-[11px] tracking-wider text-ink-dim">
-              {post.date}
+            <time class="font-mono text-xs tracking-wider text-ink-dim">
+              {primary.date}
             </time>
             <span class="w-px h-3 bg-line"></span>
-            <span class="font-mono text-[10px] tracking-widest uppercase text-ink-dim">{post.lang.toUpperCase()}</span>
+            {locales.map((l, i) => (
+              <>{i > 0 && <span class="w-px h-3 bg-line"></span>}<span class:list={["font-mono text-[11px] tracking-widest uppercase", l === locale ? "text-ink" : "text-ink-dim"]}>{l.toUpperCase()}</span></>
+            ))}
           </div>
 
           <h3 class="font-display text-base tracking-tight text-ink group-hover:text-ink-dim transition-colors duration-150 uppercase mb-2">
-            {post.title}
+            {primary.title}
           </h3>
 
           <p class="text-ink-dim text-sm leading-relaxed mb-4 flex-1">
-            {post.excerpt}
+            {primary.excerpt}
           </p>
 
           <div class="flex flex-wrap gap-2 mt-auto">
-            {post.tags.map((tag) => (
-              <span class="px-2 py-0.5 text-[10px] font-mono tracking-wider uppercase border border-line text-ink-dim">
+            {primary.tags.map((tag) => (
+              <span class="px-2 py-0.5 text-xs font-mono tracking-wider uppercase border border-line text-ink-dim">
                 {tag}
               </span>
             ))}
           </div>
         </a>
-      ))}
+        );
+      })}
     </div>
   ) : (
     <p class="text-ink-dim">{t.blogPlaceholder}</p>

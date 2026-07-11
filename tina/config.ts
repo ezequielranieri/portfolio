@@ -21,6 +21,12 @@ export default defineConfig({
         label: "Posts",
         path: "content/posts",
         format: "md",
+        ui: {
+          filename: {
+            readonly: true,
+            slugify: (values) => values?.slug || "",
+          },
+        },
         fields: [
           {
             type: "string",
@@ -40,6 +46,7 @@ export default defineConfig({
             name: "project",
             label: "Related Project",
             options: [
+              "go-iam-service",
               "hex-auth-service",
               "high-performance-task-queue",
               "async-etl-framework",
@@ -70,6 +77,12 @@ export default defineConfig({
             name: "tags",
             label: "Tags",
             list: true,
+          },
+          {
+            type: "string",
+            name: "translationOf",
+            label: "Translation of (slug)",
+            description: "Slug del post hermano en el otro idioma",
           },
           {
             type: "image",

@@ -12,38 +12,40 @@ export type BlogPostPreview = {
   cover: string;
   excerpt: string;
   lang: "en" | "es";
+  translationOf?: string;
 };
 
 export type BlogPost = BlogPostPreview & {
   content: string;
+  translationSlug?: string;
 };
 
 function parseFrontmatter(raw: string): {
   frontmatter: Record<string, unknown>;
   body: string;
 } {
-  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  if (!match) return { frontmatter: {}, body: raw };
+  const normalized = raw.replace(/\r\n/g, "\n");
+  const match = normalized.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!match) return { frontmatter: {}, body: normalized };
 
   const yaml = match[1];
   const body = match[2];
 
   const frontmatter: Record<string, unknown> = {};
-  const currentKey: string[] = [];
+  let currentKey = "";
 
   for (const line of yaml.split("\n")) {
-    const indent = line.match(/^\s*/)[0].length;
     const trimmed = line.trim();
-
     if (!trimmed || trimmed.startsWith("#")) continue;
 
     const listMatch = trimmed.match(/^-\s+(.+)$/);
     if (listMatch) {
-      const val = listMatch[1].replace(/^'(.*)'$/, "$1").replace(/^"(.*)"$/, "$1");
-      if (currentKey.length > 0) {
-        const key = currentKey[currentKey.length - 1];
-        if (!Array.isArray(frontmatter[key])) frontmatter[key] = [];
-        (frontmatter[key] as string[]).push(val);
+      let val = listMatch[1];
+      if (val.startsWith("'") && val.endsWith("'") && val.length > 1) val = val.slice(1, -1);
+      if (val.startsWith('"') && val.endsWith('"') && val.length > 1) val = val.slice(1, -1);
+      if (currentKey) {
+        if (!Array.isArray(frontmatter[currentKey])) frontmatter[currentKey] = [];
+        if (val) (frontmatter[currentKey] as string[]).push(val);
       }
       continue;
     }
@@ -51,10 +53,12 @@ function parseFrontmatter(raw: string): {
     const kvMatch = trimmed.match(/^([a-zA-Z_][a-zA-Z0-9_]*):\s*(.*)$/);
     if (kvMatch) {
       const [, key, val] = kvMatch;
-      const clean = val.replace(/^'(.*)'$/, "$1").replace(/^"(.*)"$/, "$1");
-      frontmatter[key] = clean || true;
-      currentKey.length = 0;
-      currentKey.push(key);
+      let clean = val.trim();
+      const wasQuoted = (clean.startsWith("'") || clean.startsWith('"')) && clean.length > 1;
+      if (clean.startsWith("'") && clean.endsWith("'") && clean.length > 1) clean = clean.slice(1, -1);
+      if (clean.startsWith('"') && clean.endsWith('"') && clean.length > 1) clean = clean.slice(1, -1);
+      frontmatter[key] = clean === "" && !wasQuoted ? true : clean;
+      currentKey = key;
     }
   }
 
@@ -68,35 +72,38 @@ function extractPreview(frontmatter: Record<string, unknown>, body: string): Blo
   const rawTags = frontmatter.tags;
   const tags = Array.isArray(rawTags) ? rawTags.filter(Boolean) as string[] : [];
   const cover = (frontmatter.cover as string) || "";
+  const translationOf = (frontmatter.translationOf as string) || undefined;
   const lang = ((frontmatter.lang as string) || "es").toLowerCase() as "en" | "es";
-  const excerpt = title;
+  const excerpt = body
+    .replace(/^#+\s+.*$/m, "")
+    .replace(/\n+/g, " ")
+    .trim()
+    .split(/[.!?]\s/)[0]
+    .trim()
+    .slice(0, 200) || title;
 
   if (!slug || !title) return null;
-  return { slug, title, date, tags, cover, excerpt, lang };
+  return { slug, title, date, tags, cover, excerpt, lang, translationOf };
 }
 
-let cachedPosts: BlogPostPreview[] | null = null;
-
 export async function getPosts(): Promise<BlogPostPreview[]> {
-  if (cachedPosts) return cachedPosts;
-
   try {
     const dir = await fs.readdir(POSTS_DIR);
     const mdFiles = dir.filter((f) => f.endsWith(".md"));
-
     const posts: BlogPostPreview[] = [];
 
     for (const file of mdFiles) {
-      const raw = await fs.readFile(path.join(POSTS_DIR, file), "utf-8");
-      const { frontmatter, body } = parseFrontmatter(raw);
-      const status = (frontmatter.status as string) || "";
-      if (status !== "published") continue;
-      const preview = extractPreview(frontmatter, body);
-      if (preview) posts.push(preview);
+      try {
+        const raw = await fs.readFile(path.join(POSTS_DIR, file), "utf-8");
+        const { frontmatter, body } = parseFrontmatter(raw);
+        const status = (frontmatter.status as string) || "";
+        if (status !== "published") continue;
+        const preview = extractPreview(frontmatter, body);
+        if (preview) posts.push(preview);
+      } catch {}
     }
 
     posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    cachedPosts = posts;
     return posts;
   } catch {
     return [];
@@ -105,17 +112,49 @@ export async function getPosts(): Promise<BlogPostPreview[]> {
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    const filePath = path.join(POSTS_DIR, `${slug}.md`);
-    const raw = await fs.readFile(filePath, "utf-8");
-    const { frontmatter, body } = parseFrontmatter(raw);
-    const status = (frontmatter.status as string) || "";
-    if (status !== "published") return null;
-    const preview = extractPreview(frontmatter, body);
-    if (!preview) return null;
+    const dir = await fs.readdir(POSTS_DIR);
+    const mdFiles = dir.filter((f) => f.endsWith(".md"));
 
-    const content = await marked.parse(body, { async: false });
+    let post: BlogPost | null = null;
 
-    return { ...preview, content };
+    for (const file of mdFiles) {
+      try {
+        const raw = await fs.readFile(path.join(POSTS_DIR, file), "utf-8");
+        const { frontmatter, body } = parseFrontmatter(raw);
+        const fileSlug = (frontmatter.slug as string) || "";
+        const status = (frontmatter.status as string) || "";
+
+        if (fileSlug !== slug || status !== "published") continue;
+
+        const preview = extractPreview(frontmatter, body);
+        if (!preview) return null;
+
+        const content = await marked.parse(body, { async: false });
+        post = { ...preview, content };
+        break;
+      } catch {}
+    }
+
+    if (!post) return null;
+
+    if (post.translationOf) {
+      post.translationSlug = post.translationOf;
+    } else {
+      for (const file of mdFiles) {
+        try {
+          const raw = await fs.readFile(path.join(POSTS_DIR, file), "utf-8");
+          const { frontmatter, body } = parseFrontmatter(raw);
+          const status = (frontmatter.status as string) || "";
+          const otherTranslationOf = (frontmatter.translationOf as string) || "";
+          if (otherTranslationOf === post.slug && status === "published") {
+            post.translationSlug = (frontmatter.slug as string) || "";
+            break;
+          }
+        } catch {}
+      }
+    }
+
+    return post;
   } catch {
     return null;
   }

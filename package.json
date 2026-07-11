@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "^4.1.0",
     "@tinacms/astro": "^0.5.1",
     "@tinacms/cli": "^2.5.3",
+    "@vercel/analytics": "^2.0.1",
     "astro": "^5.7.0",
     "marked": "^18.0.6",
     "tailwindcss": "^4.1.0",

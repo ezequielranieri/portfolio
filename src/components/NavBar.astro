@@ -4,48 +4,222 @@ import { translations } from "../lib/i18n";
 
 export interface Props {
   locale: Locale;
+  localeToggleHref?: string;
 }
 
-const { locale } = Astro.props;
+const { locale, localeToggleHref } = Astro.props;
 const t = translations[locale];
 const other: Locale = locale === "en" ? "es" : "en";
+const toggleHref = localeToggleHref || "/" + other + "/";
 ---
 
-<nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-sm">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-sm" id="navbar">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-    <a href={"/" + locale + "/"} class="font-mono text-xs tracking-widest uppercase text-ink hover:text-ink-dim transition-colors duration-150">
-      // er
+    <a href={"/" + locale + "/"} class="text-ink hover:text-ink-dim transition-colors duration-150 flex items-center shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2304 1536" class="h-10 w-auto">
+        <g transform="translate(0,1536) scale(0.1,-0.1)">
+          <path id="logo-path" class="logo-path" fill="currentColor" d="M11730 12379 c-1008 -25 -2075 -230 -2880 -552 -667 -266 -1306 -670
+-1824 -1151 -154 -143 -388 -396 -521 -561 -219 -274 -463 -672 -619 -1012
+-361 -785 -491 -1534 -390 -2241 9 -62 15 -114 13 -116 -2 -2 -166 -56 -364
+-121 -570 -185 -959 -331 -1185 -445 -93 -47 -126 -76 -108 -98 26 -31 132 -8
+638 136 406 116 914 255 1041 285 26 7 27 5 49 -86 54 -219 183 -564 292 -780
+110 -219 243 -429 399 -632 115 -148 463 -498 612 -615 716 -561 1566 -910
+2477 -1015 191 -23 580 -30 780 -16 1014 73 2063 495 3060 1230 199 146 433
+337 740 601 244 209 284 244 635 556 337 298 395 349 755 659 102 88 266 230
+365 315 356 307 1225 1033 2065 1725 407 335 798 661 935 780 77 66 255 219
+395 340 140 121 361 312 490 424 129 113 289 252 355 309 168 146 195 172 195
+188 0 33 -51 7 -250 -131 -696 -483 -2369 -1758 -3257 -2481 -66 -54 -188
+-153 -269 -219 -428 -346 -1202 -976 -1524 -1240 -201 -164 -423 -346 -495
+-404 -71 -58 -278 -227 -460 -375 -874 -713 -1305 -1011 -1875 -1295 -685
+-341 -1331 -511 -2053 -540 -754 -31 -1430 100 -2042 393 -890 428 -1523 1115
+-1820 1976 -46 133 -115 385 -115 418 0 13 20 23 88 41 318 87 1015 289 1587
+461 369 111 735 221 815 245 80 24 242 72 360 108 359 108 620 181 626 174 4
+-3 -34 -93 -84 -199 -296 -633 -546 -1195 -626 -1406 -81 -218 -92 -285 -53
+-343 49 -73 150 -89 284 -44 83 28 290 130 518 255 83 45 393 214 690 375 625
+338 670 364 670 391 0 32 -55 28 -202 -16 -326 -99 -878 -316 -1378 -543 -153
+-69 -161 -71 -169 -52 -17 45 194 522 594 1348 l173 357 41 11 c23 6 275 80
+561 164 547 161 984 288 1148 335 53 15 97 23 97 18 0 -5 -25 -73 -56 -150
+-140 -357 -302 -824 -358 -1038 -55 -211 -57 -264 -9 -321 58 -68 162 -87 275
+-48 70 23 196 80 443 199 761 367 1493 715 1870 888 377 173 472 219 480 231
+11 19 -15 41 -50 41 -54 0 -413 -108 -810 -243 -391 -134 -947 -352 -1410
+-555 -425 -185 -427 -186 -441 -167 -9 11 -8 31 2 78 31 148 169 544 321 921
+109 269 113 278 143 287 14 4 185 53 380 109 195 56 445 128 555 160 110 32
+268 77 350 100 83 23 274 77 425 120 151 43 401 113 555 155 154 42 377 103
+495 135 398 109 545 148 548 146 1 -2 -4 -16 -12 -32 -113 -230 -320 -743
+-380 -939 -49 -159 -56 -231 -27 -278 46 -74 158 -92 281 -45 91 35 331 145
+620 283 135 65 283 134 330 155 47 21 189 86 315 145 127 58 403 183 614 278
+211 94 386 177 389 185 7 18 -16 32 -53 32 -43 0 -276 -60 -489 -126 -335
+-104 -685 -236 -1402 -529 -111 -46 -198 -76 -208 -72 -25 10 -19 56 23 174
+86 239 336 826 366 861 2 2 162 50 356 107 445 130 720 214 1219 372 217 69
+423 134 457 144 71 22 83 33 51 50 -31 17 -130 6 -364 -40 -338 -67 -759 -168
+-1374 -330 -124 -32 -226 -58 -228 -56 -4 4 125 277 250 528 l119 237 57 29
+c174 88 654 270 997 378 195 61 456 129 605 158 189 36 180 32 139 58 -31 20
+-46 22 -174 21 -312 -1 -912 -128 -1540 -326 -205 -64 -227 -76 -268 -141 -79
+-123 -292 -513 -422 -772 l-140 -279 -645 -163 c-1129 -283 -1672 -422 -2165
+-554 -264 -71 -483 -128 -487 -126 -11 4 364 818 407 883 57 87 1232 508 1880
+674 198 50 195 49 195 61 0 6 -17 17 -37 26 -131 54 -822 -67 -1514 -266 -206
+-59 -618 -195 -672 -223 -20 -10 -51 -38 -68 -61 -46 -63 -320 -619 -443 -897
+-59 -135 -115 -260 -124 -279 -16 -32 -24 -36 -102 -57 -153 -40 -887 -241
+-1295 -353 -220 -61 -403 -111 -407 -111 -11 0 29 85 274 580 283 572 310 632
+299 662 -19 50 -48 63 -127 61 -143 -4 -651 -88 -1134 -188 -824 -169 -1746
+-432 -1846 -526 -51 -48 24 -63 167 -34 41 8 229 44 419 80 190 36 505 97 700
+135 1082 210 1387 266 1397 256 3 -3 -5 -27 -19 -53 -232 -437 -372 -708 -457
+-885 l-104 -215 -241 -68 c-133 -38 -293 -83 -356 -101 -120 -33 -1409 -403
+-1565 -449 -456 -133 -929 -277 -1258 -382 -148 -47 -270 -83 -272 -81 -2 2
+-9 44 -15 93 -17 132 -15 483 4 660 79 720 426 1540 935 2205 440 574 1032
+1075 1726 1460 929 514 2204 842 3600 924 242 15 438 27 679 42 60 4 93 10 85
+15 -10 6 -8 9 9 9 45 0 12 17 -55 28 -267 45 -680 63 -1163 51z"/>
+        </g>
+      </svg>
     </a>
+
     <div class="flex items-center gap-6">
-      <ul class="flex items-center gap-6">
-        <li>
-          <a href={"/" + locale + "/#inicio"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
-            {t.nav.home}
-          </a>
-        </li>
-        <li>
-          <a href={"/" + locale + "/#proyectos"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
-            {t.nav.projects}
-          </a>
-        </li>
-        <li>
-          <a href={"/" + locale + "/#blog"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
-            {t.nav.blog}
-          </a>
-        </li>
-        <li>
-          <a href={"/" + locale + "/#contacto"} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
-            {t.nav.contact}
-          </a>
-        </li>
+      <ul id="nav-links" class="hidden sm:flex items-center gap-6">
+        <li><a href={"/" + locale + "/#inicio"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="inicio">{t.nav.home}</a></li>
+        <li><a href={"/" + locale + "/#proyectos"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="proyectos">{t.nav.projects}</a></li>
+        <li><a href={"/" + locale + "/#blog"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="blog">{t.nav.blog}</a></li>
+        <li><a href={"/" + locale + "/#contacto"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="contacto">{t.nav.contact}</a></li>
       </ul>
-      <span class="w-px h-4 bg-line"></span>
-      <a
-        href={"/" + other + "/"}
-        class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150"
-      >
+
+      <span class="hidden sm:block w-px h-4 bg-line"></span>
+
+      <a href={toggleHref} class="hidden sm:inline-flex font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150">
         {other === "en" ? "EN" : "ES"}
       </a>
+
+      <button id="menu-toggle" class="sm:hidden inline-flex items-center justify-center w-8 h-8 text-ink-dim hover:text-ink transition-colors duration-150" aria-label={locale === "es" ? "Menú" : "Menu"} aria-expanded="false">
+        <svg id="menu-icon-open" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="4" y1="6" x2="20" y2="6"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="18" x2="20" y2="18"></line>
+        </svg>
+        <svg id="menu-icon-close" class="w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
   </div>
+
+  <div id="mobile-menu" class="sm:hidden hidden border-t border-line bg-bg">
+    <ul class="flex flex-col px-4 py-4 gap-3">
+      <li><a href={"/" + locale + "/#inicio"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="inicio">{t.nav.home}</a></li>
+      <li><a href={"/" + locale + "/#proyectos"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="proyectos">{t.nav.projects}</a></li>
+      <li><a href={"/" + locale + "/#blog"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="blog">{t.nav.blog}</a></li>
+      <li><a href={"/" + locale + "/#contacto"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="contacto">{t.nav.contact}</a></li>
+      <li class="pt-2 border-t border-line"><a href={toggleHref} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2">{other === "en" ? "EN" : "ES"}</a></li>
+    </ul>
+  </div>
 </nav>
+
+<style>
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--color-ink);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 180ms ease-out;
+  }
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .logo-path:not(.done) {
+      fill: transparent;
+      stroke: currentColor;
+      stroke-width: 80;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .logo-path.animate {
+      stroke-dashoffset: var(--path-length, 5000);
+      stroke-dasharray: var(--path-length, 5000);
+      animation: logo-draw 1.8s ease-out forwards;
+    }
+    .logo-path.done {
+      fill: currentColor;
+      stroke: none;
+    }
+    @keyframes logo-draw {
+      to { stroke-dashoffset: 0; }
+    }
+  }
+</style>
+
+<script is:inline>
+(() => {
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const logoPath = document.getElementById("logo-path");
+  if (!prefersReduced && logoPath) {
+    const length = logoPath.getTotalLength();
+    logoPath.style.setProperty("--path-length", String(length));
+    logoPath.classList.add("animate");
+    logoPath.addEventListener("animationend", () => {
+      logoPath.classList.remove("animate");
+      logoPath.classList.add("done");
+    }, { once: true });
+  }
+
+  const menuToggle = document.getElementById("menu-toggle");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const menuOpen = document.getElementById("menu-icon-open");
+  const menuClose = document.getElementById("menu-icon-close");
+
+  if (menuToggle && mobileMenu) {
+    menuToggle.addEventListener("click", () => {
+      const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+      menuToggle.setAttribute("aria-expanded", String(!expanded));
+      mobileMenu.classList.toggle("hidden");
+      menuOpen.classList.toggle("hidden");
+      menuClose.classList.toggle("hidden");
+    });
+  }
+
+  const sections = ["inicio", "proyectos", "blog", "contacto"];
+  const observers = [];
+
+  for (const id of sections) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+
+    const link = document.querySelector(`.nav-link[data-section="${id}"]`);
+    if (!link) continue;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            document.querySelectorAll(".nav-link").forEach((l) => {
+              l.classList.remove("text-ink");
+              l.classList.add("text-ink-dim");
+            });
+            link.classList.remove("text-ink-dim");
+            link.classList.add("text-ink");
+          }
+        }
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+
+    observer.observe(el);
+    observers.push(observer);
+  }
+
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (menuToggle && mobileMenu && menuToggle.getAttribute("aria-expanded") === "true") {
+        menuToggle.setAttribute("aria-expanded", "false");
+        mobileMenu.classList.add("hidden");
+        menuOpen.classList.remove("hidden");
+        menuClose.classList.add("hidden");
+      }
+    });
+  });
+})();
+</script>

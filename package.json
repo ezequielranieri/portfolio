@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "tinacms dev -c \"astro dev\"",
-    "build": "tinacms build && astro build",
+    "build": "tinacms build --skip-cloud-checks && astro build",
     "build:local": "tinacms build --skip-cloud-checks --skip-indexing && astro build",
     "preview": "astro preview"
   },

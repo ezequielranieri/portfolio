@@ -46,11 +46,11 @@ const localeToggleHref = hasTranslation
     </nav>
 
     <header class="mb-10">
-      <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-3 mb-4 flex-wrap">
         <time class="font-mono text-xs tracking-wider text-ink-dim">{date}</time>
-        <span class="w-px h-3 bg-line"></span>
-        <span class="font-mono text-[11px] tracking-widest uppercase text-ink-dim">{lang.toUpperCase()}</span>
-        <span class="w-px h-3 bg-line"></span>
+        <span class="w-px h-3 bg-line shrink-0"></span>
+        <span class="font-mono text-[11px] tracking-widest uppercase text-ink-dim shrink-0">{lang.toUpperCase()}</span>
+        <span class="w-px h-3 bg-line shrink-0"></span>
         <div class="flex flex-wrap gap-2">
           {tags.map((tag) => <span class="px-2 py-0.5 text-[11px] font-mono tracking-wider uppercase border border-line text-ink-dim">{tag}</span>)}
         </div>

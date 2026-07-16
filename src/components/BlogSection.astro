@@ -69,13 +69,13 @@ const latest = groups.slice(0, 3);
           href={"/" + primary.lang + "/blog/" + primary.slug}
           class="border border-line p-5 sm:p-6 flex flex-col h-full hover:bg-bg-raised hover:-translate-y-0.5 transition duration-150 group"
         >
-          <div class="flex items-center gap-2 mb-3">
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
             <time class="font-mono text-xs tracking-wider text-ink-dim">
               {primary.date}
             </time>
-            <span class="w-px h-3 bg-line"></span>
+            <span class="w-px h-3 bg-line shrink-0"></span>
             {locales.map((l, i) => (
-              <>{i > 0 && <span class="w-px h-3 bg-line"></span>}<span class:list={["font-mono text-[11px] tracking-widest uppercase", l === locale ? "text-ink" : "text-ink-dim"]}>{l.toUpperCase()}</span></>
+              <>{i > 0 && <span class="w-px h-3 bg-line shrink-0"></span>}<span class:list={["font-mono text-[11px] tracking-widest uppercase shrink-0", l === locale ? "text-ink" : "text-ink-dim"]}>{l.toUpperCase()}</span></>
             ))}
           </div>
 

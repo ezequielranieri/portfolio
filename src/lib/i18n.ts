@@ -5,6 +5,7 @@ export const translations = {
   en: {
     hero: {
       subtitle: "// backend & security engineer",
+      tagline: "IAM • distributed systems • security",
       bio: "I design and build secure, scalable, production-grade backend systems — combining strong architectural thinking with modern workflows to deliver reliable solutions with speed and precision. My focus: Identity & Access Management, distributed systems, and security engineering.",
       ctaProjects: "projects",
       ctaBlog: "blog",
@@ -33,6 +34,7 @@ export const translations = {
   es: {
     hero: {
       subtitle: "// backend & security engineer",
+      tagline: "IAM • sistemas distribuidos • seguridad",
       bio: "Diseño y construyo sistemas backend seguros y escalables, listos para producción. Combino pensamiento arquitectónico sólido con flujos de trabajo modernos para entregar soluciones confiables con velocidad y precisión. Mi foco: gestión de identidad y accesos (IAM), sistemas distribuidos, e ingeniería de seguridad.",
       ctaProjects: "proyectos",
       ctaBlog: "blog",

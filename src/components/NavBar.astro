@@ -78,6 +78,7 @@ c174 88 654 270 997 378 195 61 456 129 605 158 189 36 180 32 139 58 -31 20
         <li><a href={"/" + locale + "/#inicio"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="inicio">{t.nav.home}</a></li>
         <li><a href={"/" + locale + "/#proyectos"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="proyectos">{t.nav.projects}</a></li>
         <li><a href={"/" + locale + "/#blog"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="blog">{t.nav.blog}</a></li>
+        <li><a href={"/" + locale + "/#trabajo"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="trabajo">{t.nav.howIWork}</a></li>
         <li><a href={"/" + locale + "/#contacto"} class="nav-link relative font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150" data-section="contacto">{t.nav.contact}</a></li>
       </ul>
 
@@ -106,6 +107,7 @@ c174 88 654 270 997 378 195 61 456 129 605 158 189 36 180 32 139 58 -31 20
       <li><a href={"/" + locale + "/#inicio"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="inicio">{t.nav.home}</a></li>
       <li><a href={"/" + locale + "/#proyectos"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="proyectos">{t.nav.projects}</a></li>
       <li><a href={"/" + locale + "/#blog"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="blog">{t.nav.blog}</a></li>
+      <li><a href={"/" + locale + "/#trabajo"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="trabajo">{t.nav.howIWork}</a></li>
       <li><a href={"/" + locale + "/#contacto"} class="nav-link font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2" data-section="contacto">{t.nav.contact}</a></li>
       <li class="pt-2 border-t border-line"><a href={toggleHref} class="font-mono text-xs tracking-widest uppercase text-ink-dim hover:text-ink transition-colors duration-150 block py-2">{other === "en" ? "EN" : "ES"}</a></li>
     </ul>
@@ -181,7 +183,7 @@ c174 88 654 270 997 378 195 61 456 129 605 158 189 36 180 32 139 58 -31 20
     });
   }
 
-  const sections = ["inicio", "proyectos", "blog", "contacto"];
+  const sections = ["inicio", "proyectos", "blog", "trabajo", "contacto"];
   const observers = [];
 
   for (const id of sections) {

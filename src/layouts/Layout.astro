@@ -11,7 +11,7 @@ interface Props {
   localeToggleHref?: string;
 }
 
-const { title = "Ezequiel Ranieri — Backend & Security Engineer", description = "Portfolio personal de un Backend & Security Engineer", locale = "es", contentLang, localeToggleHref } = Astro.props;
+const { title = "Ezequiel Ranieri — Ingeniero Backend | AI-Fluent", description = "Portfolio personal de un Ingeniero Backend | AI-Fluent", locale = "es", contentLang, localeToggleHref } = Astro.props;
 
 const SITE_URL = process.env.SITE_URL || Astro.url.origin || "";
 const BASE_URL = SITE_URL.replace(/\/$/, "");
@@ -60,7 +60,7 @@ const absUrl = (path: string) => `${BASE_URL}${path}`;
       "@type": "Person",
       "name": "Ezequiel Ranieri",
       "url": absUrl("/"),
-      "jobTitle": "Backend & Security Engineer",
+      "jobTitle": "Backend Engineer | AI-Fluent",
       "sameAs": [
         "https://github.com/ezequielranieri",
         "https://www.linkedin.com/in/ezequielranieri",

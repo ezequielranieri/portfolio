@@ -9,7 +9,7 @@ export async function GET() {
 
   return rss({
     title: "Ezequiel Ranieri — Blog",
-    description: "Backend & Security Engineer — distributed systems, IAM, and security engineering.",
+    description: "Backend Engineer | AI-Fluent — distributed systems, IAM, and security engineering.",
     site,
     items: posts.map((p) => ({
       title: p.title,

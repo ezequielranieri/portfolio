@@ -47,6 +47,13 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Python", "Celery", "RabbitMQ", "PostgreSQL"],
   },
+  "go-durable-jobs": {
+    description: {
+      en: "Durable job queue built on Postgres as the single source of truth, with a native Go worker pool. Real idempotency via unique constraint, safe dequeue with SKIP LOCKED, retries with backoff, and an explicit dead letter queue.",
+      es: "Cola durable de jobs construida sobre Postgres como única fuente de verdad, con un worker pool nativo en Go. Idempotencia real vía unique constraint, dequeue seguro con SKIP LOCKED, retries con backoff, y dead letter queue explícita.",
+    },
+    stack: ["Go", "PostgreSQL"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);

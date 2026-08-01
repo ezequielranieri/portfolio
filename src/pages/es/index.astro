@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Hero from "../../components/Hero.astro";
 import ProjectsSection from "../../components/ProjectsSection.astro";
 import BlogSection from "../../components/BlogSection.astro";
+import HowIWork from "../../components/HowIWork.astro";
 import ContactSection from "../../components/ContactSection.astro";
 import { translations } from "../../lib/i18n";
 
@@ -12,12 +13,14 @@ const locale = "es";
 const t = translations[locale];
 ---
 
-<Layout locale={locale} title="Ezequiel Ranieri — Backend & Security Engineer" description="Portfolio personal de un Backend & Security Engineer">
+<Layout locale={locale} title="Ezequiel Ranieri — Ingeniero Backend | AI-Fluent" description="Portfolio personal de un Ingeniero Backend | AI-Fluent">
   <Hero locale={locale} />
   <main id="main-content" class="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
     <ProjectsSection locale={locale} />
 
     <BlogSection locale={locale} />
+
+    <HowIWork locale={locale} />
 
     <ContactSection locale={locale} />
   </main>

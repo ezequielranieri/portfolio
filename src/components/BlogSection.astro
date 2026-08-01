@@ -71,7 +71,7 @@ const latest = groups.slice(0, 3);
         >
           <div class="flex items-center gap-2 mb-3 flex-wrap">
             <time class="font-mono text-xs tracking-wider text-ink-dim">
-              {primary.date}
+              {primary.date.slice(0, 10)}
             </time>
             <span class="w-px h-3 bg-line shrink-0"></span>
             {locales.map((l, i) => (

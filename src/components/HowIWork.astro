@@ -1,0 +1,34 @@
+---
+import type { Locale } from "../lib/i18n";
+import { translations } from "../lib/i18n";
+
+export interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale].howIWork;
+---
+
+<section id="trabajo" class="py-24 scroll-mt-14 sm:scroll-mt-16">
+  <h2 class="section-heading font-mono text-xs tracking-widest uppercase text-ink-dim mb-12">
+    {t.title}
+  </h2>
+
+  <p class="text-ink-dim text-sm sm:text-base leading-relaxed mb-10 max-w-2xl">
+    {t.intro}
+  </p>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    {t.principles.map((principle) => (
+      <div class="border border-line p-5 sm:p-6 flex flex-col">
+        <h3 class="font-mono text-xs tracking-widest uppercase text-ink mb-3">
+          {principle.title}
+        </h3>
+        <p class="text-ink-dim text-sm leading-relaxed">
+          {principle.body}
+        </p>
+      </div>
+    ))}
+  </div>
+</section>

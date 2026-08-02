@@ -13,6 +13,7 @@ export type BlogPostPreview = {
   excerpt: string;
   lang: "en" | "es";
   translationOf?: string;
+  project?: string;
 };
 
 export type BlogPost = BlogPostPreview & {
@@ -73,6 +74,7 @@ function extractPreview(frontmatter: Record<string, unknown>, body: string): Blo
   const tags = Array.isArray(rawTags) ? rawTags.filter(Boolean) as string[] : [];
   const cover = (frontmatter.cover as string) || "";
   const translationOf = (frontmatter.translationOf as string) || undefined;
+  const project = (frontmatter.project as string) || undefined;
   const lang = ((frontmatter.lang as string) || "es").toLowerCase() as "en" | "es";
   const excerpt = body
     .replace(/^#+\s+.*$/m, "")
@@ -83,7 +85,7 @@ function extractPreview(frontmatter: Record<string, unknown>, body: string): Blo
     .slice(0, 200) || title;
 
   if (!slug || !title) return null;
-  return { slug, title, date, tags, cover, excerpt, lang, translationOf };
+  return { slug, title, date, tags, cover, excerpt, lang, translationOf, project };
 }
 
 export async function getPosts(): Promise<BlogPostPreview[]> {

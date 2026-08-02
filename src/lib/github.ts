@@ -58,24 +58,35 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);
 
-function placeholderProjects(): Project[] {
-  const user = process.env.GITHUB_USERNAME || "ezequielranieri";
+async function buildProjectNames(): Promise<string[]> {
   const featured = process.env.GITHUB_FEATURED_REPOS;
-  let names = DEFAULT_REPOS;
-  if (featured) {
-    const filtered = featured.split(",").map((s) => s.trim());
-    names = filtered.filter((n) => DEFAULT_REPOS.includes(n));
-  }
-  return names.map((name) => {
-    const o = MANUAL_OVERRIDES[name];
-    return {
-      name,
-      description: o.description,
-      stack: o.stack,
-      repoUrl: `https://github.com/${user}/${name}`,
-      stars: 0,
-    };
-  });
+  const envNames = featured
+    ? featured.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const { getPosts } = await import("./posts");
+  const articleProjects = (await getPosts())
+    .map((p) => p.project)
+    .filter((n): n is string => !!n && !envNames.includes(n));
+
+  const names = [...envNames, ...articleProjects];
+  return [...new Set(names)];
+}
+
+function placeholderProjects(names: string[]): Project[] {
+  const user = process.env.GITHUB_USERNAME || "ezequielranieri";
+  return names
+    .filter((name) => DEFAULT_REPOS.includes(name))
+    .map((name) => {
+      const o = MANUAL_OVERRIDES[name];
+      return {
+        name,
+        description: o.description,
+        stack: o.stack,
+        repoUrl: `https://github.com/${user}/${name}`,
+        stars: 0,
+      };
+    });
 }
 
 async function fetchWithTimeout(url: string, options: RequestInit, ms = 4000): Promise<Response> {
@@ -91,9 +102,10 @@ async function fetchWithTimeout(url: string, options: RequestInit, ms = 4000): P
 
 export async function getProjects(): Promise<Project[]> {
   const username = process.env.GITHUB_USERNAME;
+  const names = await buildProjectNames();
 
   if (!username) {
-    return placeholderProjects();
+    return placeholderProjects(names);
   }
 
   const headers: Record<string, string> = {
@@ -109,7 +121,7 @@ export async function getProjects(): Promise<Project[]> {
     );
 
     if (!res.ok) {
-      return placeholderProjects();
+      return placeholderProjects(names);
     }
 
     const repos = (await res.json()) as Array<{
@@ -124,10 +136,8 @@ export async function getProjects(): Promise<Project[]> {
 
     const valid = repos.filter((r) => !r.fork && !r.private);
 
-    const featured = process.env.GITHUB_FEATURED_REPOS;
     let selected: typeof valid;
-    if (featured) {
-      const names = featured.split(",").map((s) => s.trim());
+    if (names.length > 0) {
       selected = names
         .map((n) => valid.find((r) => r.name === n))
         .filter((r): r is (typeof valid)[number] => r !== undefined);
@@ -149,6 +159,6 @@ export async function getProjects(): Promise<Project[]> {
       };
     });
   } catch {
-    return placeholderProjects();
+    return placeholderProjects(names);
   }
 }

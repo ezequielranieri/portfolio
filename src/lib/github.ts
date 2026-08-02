@@ -59,18 +59,24 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);
 
 async function buildProjectNames(): Promise<string[]> {
+  const { getPosts } = await import("./posts");
+  const posts = await getPosts();
+
+  const fromArticles: string[] = [];
+  for (const post of posts) {
+    if (post.project && !fromArticles.includes(post.project)) {
+      fromArticles.push(post.project);
+    }
+  }
+
   const featured = process.env.GITHUB_FEATURED_REPOS;
   const envNames = featured
     ? featured.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
-  const { getPosts } = await import("./posts");
-  const articleProjects = (await getPosts())
-    .map((p) => p.project)
-    .filter((n): n is string => !!n && !envNames.includes(n));
+  const remaining = envNames.filter((n) => !fromArticles.includes(n));
 
-  const names = [...envNames, ...articleProjects];
-  return [...new Set(names)];
+  return [...fromArticles, ...remaining];
 }
 
 function placeholderProjects(names: string[]): Project[] {

@@ -10,6 +10,7 @@ export const translations = {
       ctaProjects: "projects",
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — view credential",
+      badgeLabel2: "LFEL1012 Secure AI/ML-Driven Software Development — view credential",
     },
     nav: {
       home: "Home",
@@ -68,6 +69,7 @@ export const translations = {
       ctaProjects: "proyectos",
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — ver credencial",
+      badgeLabel2: "LFEL1012 Secure AI/ML-Driven Software Development — ver credencial",
     },
     nav: {
       home: "Home",

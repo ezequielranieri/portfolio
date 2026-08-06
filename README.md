@@ -49,7 +49,7 @@ Each featured project can have zero, one, or multiple associated posts that dive
 | **Styles** | Tailwind CSS v4 | Vite plugin, no legacy `tailwind.config` file. CSS variables as design tokens |
 | **CMS** | TinaCMS | Visual editor at `/admin`, content versioned in Git. Publish = commit = auto-deploy, no external webhooks |
 | **Deploy** | Vercel | Free tier, native Git integration, auto-builds per branch |
-| **Fonts** | Archivo / Inter / JetBrains Mono | Display bold for headings, Inter for body, mono for code and metadata |
+| **Fonts** | Sora / DM Sans / JetBrains Mono | Sora (display) for headings, DM Sans for body, JetBrains Mono for code and metadata |
 | **Analytics** | `@vercel/analytics` | Serverless, cookie-free, privacy-respecting |
 
 ## Project Structure

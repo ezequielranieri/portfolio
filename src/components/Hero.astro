@@ -21,25 +21,41 @@ const s = translations[locale].nav;
     <h1 class="font-display text-[clamp(2.5rem,8vw,6rem)] leading-[1.05] tracking-tight text-ink select-none">
       EZEQUIEL<br />RANIERI
     </h1>
-    <p class="mt-4 font-mono text-xs tracking-widest text-accent select-none">
+    <p class="mt-4 font-mono text-xs tracking-widest uppercase text-accent select-none">
       {t.tagline}
     </p>
-    <a
-      href="https://www.credly.com/badges/6cfd4b7b-97a2-41ba-a9aa-dae369f89453"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="mt-6 inline-flex items-center justify-center select-none"
-      aria-label={t.badgeLabel}
-    >
-      <img
-        src="/badges/credly-lfd121-secure-software-512.png"
-        alt=""
-        width="40"
-        height="40"
-        decoding="async"
-        class="w-10 h-10 badge-color-accent"
-      />
-    </a>
+    <div class="mt-6 flex items-center justify-center gap-3 select-none">
+      <a
+        href="https://www.credly.com/badges/6cfd4b7b-97a2-41ba-a9aa-dae369f89453"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t.badgeLabel}
+      >
+        <img
+          src="/badges/credly-lfd121-secure-software-512.png"
+          alt=""
+          width="40"
+          height="40"
+          decoding="async"
+          class="w-10 h-10 badge-color-accent"
+        />
+      </a>
+      <a
+        href="https://www.credly.com/badges/5a40b7c0-c673-4cb9-8845-1b2b9212eac3/public_url"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t.badgeLabel2}
+      >
+        <img
+          src="/badges/lfel1012-secure-ai-ml-driven-software-development-512.png"
+          alt=""
+          width="40"
+          height="40"
+          decoding="async"
+          class="w-10 h-10 badge-color-accent"
+        />
+      </a>
+    </div>
     <p class="mt-6 max-w-md mx-auto text-ink-dim text-sm sm:text-base leading-relaxed" style="color: var(--color-ink-dim);">
       {t.bio}
     </p>

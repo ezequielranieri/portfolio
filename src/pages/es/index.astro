@@ -4,6 +4,7 @@ import Hero from "../../components/Hero.astro";
 import ProjectsSection from "../../components/ProjectsSection.astro";
 import BlogSection from "../../components/BlogSection.astro";
 import HowIWork from "../../components/HowIWork.astro";
+import CertificationsSection from "../../components/CertificationsSection.astro";
 import ContactSection from "../../components/ContactSection.astro";
 import { translations } from "../../lib/i18n";
 
@@ -21,6 +22,8 @@ const t = translations[locale];
     <BlogSection locale={locale} />
 
     <HowIWork locale={locale} />
+
+    <CertificationsSection locale={locale} />
 
     <ContactSection locale={locale} />
   </main>

@@ -12,9 +12,9 @@ const t = translations[locale].hero;
 const s = translations[locale].nav;
 ---
 
-<section id="inicio" class="relative min-h-screen flex items-center justify-center overflow-hidden scroll-mt-0">
+<section id="inicio" class="relative min-h-screen flex flex-col overflow-hidden scroll-mt-0">
   <TerminalField />
-  <div class="relative z-10 text-center px-4 sm:px-6">
+  <div class="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 py-20">
     <p class="font-mono text-xs sm:text-sm tracking-widest uppercase text-ink-dim mb-6">
       {t.subtitle}
     </p>
@@ -24,6 +24,22 @@ const s = translations[locale].nav;
     <p class="mt-4 font-mono text-xs tracking-widest text-accent select-none">
       {t.tagline}
     </p>
+    <a
+      href="https://www.credly.com/badges/6cfd4b7b-97a2-41ba-a9aa-dae369f89453"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="mt-6 inline-flex items-center justify-center select-none"
+      aria-label={t.badgeLabel}
+    >
+      <img
+        src="/badges/credly-lfd121-secure-software-512.png"
+        alt=""
+        width="40"
+        height="40"
+        decoding="async"
+        class="w-10 h-10 badge-color-accent"
+      />
+    </a>
     <p class="mt-6 max-w-md mx-auto text-ink-dim text-sm sm:text-base leading-relaxed" style="color: var(--color-ink-dim);">
       {t.bio}
     </p>
@@ -51,6 +67,17 @@ const s = translations[locale].nav;
 </section>
 
 <style>
+  .badge-color-accent {
+    filter: none;
+    opacity: 0.85;
+    transition: filter 180ms ease-out, opacity 180ms ease-out;
+  }
+
+  .badge-color-accent:hover {
+    filter: grayscale(1) contrast(1.05) brightness(0.9);
+    opacity: 1;
+  }
+
   .scroll-indicator-inner {
     top: 4px;
     animation: scroll-wheel 1.8s ease-in-out infinite;

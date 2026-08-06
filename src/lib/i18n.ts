@@ -9,12 +9,14 @@ export const translations = {
       bio: "I design and build secure, scalable, production-grade backend systems — combining strong architectural thinking with modern AI-assisted workflows to deliver high-quality solutions with speed and precision. My focus: Identity & Access Management, distributed systems, and security engineering.",
       ctaProjects: "projects",
       ctaBlog: "blog",
+      badgeLabel: "LFD121 Developing Secure Software — view credential",
     },
     nav: {
       home: "Home",
       projects: "Projects",
       blog: "Blog",
       howIWork: "How I Work",
+      certifications: "Certifications",
       contact: "Contact",
     },
     howIWork: {
@@ -49,6 +51,10 @@ export const translations = {
       back: "← back",
       readTranslation: "Read in Spanish →",
     },
+    certifications: {
+      title: "// certifications",
+      verify: "verify →",
+    },
     contact: {
       contactTitle: "// contact",
       email: "Email",
@@ -61,12 +67,14 @@ export const translations = {
       bio: "Diseño y construyo sistemas backend seguros y escalables, listos para producción. Combino pensamiento arquitectónico sólido con flujos de trabajo asistidos por IA para entregar soluciones de alta calidad con velocidad y precisión. Mi foco: gestión de identidad y accesos (IAM), sistemas distribuidos, e ingeniería de seguridad.",
       ctaProjects: "proyectos",
       ctaBlog: "blog",
+      badgeLabel: "LFD121 Developing Secure Software — ver credencial",
     },
     nav: {
       home: "Home",
       projects: "Proyectos",
       blog: "Blog",
       howIWork: "Cómo Trabajo",
+      certifications: "Certificaciones",
       contact: "Contacto",
     },
     howIWork: {
@@ -100,6 +108,10 @@ export const translations = {
     blog: {
       back: "← volver",
       readTranslation: "Leer en inglés →",
+    },
+    certifications: {
+      title: "// certificaciones",
+      verify: "verificar →",
     },
     contact: {
       contactTitle: "// contacto",

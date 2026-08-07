@@ -46,7 +46,7 @@ export default defineConfig({
             name: "project",
             label: "Related Project",
             options: [
-              "go-iam-service",
+              "go-authz",
               "hex-auth-service",
               "high-performance-task-queue",
               "async-etl-framework",

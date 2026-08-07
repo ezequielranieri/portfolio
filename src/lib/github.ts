@@ -19,10 +19,10 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Python", "FastAPI", "PostgreSQL", "Redis"],
   },
-  "go-iam-service": {
+  "go-authz": {
     description: {
-      en: "Performance-first authentication and identity service built as a modular monolith with Clean Architecture. Includes refresh token rotation with breach detection, Lua/Redis rate limiting, and full observability (Prometheus metrics, structured logging).",
-      es: "Servicio de autenticación e identidad performance-first, construido como modular monolith con Clean Architecture. Incluye rotación de refresh tokens con detección de breach, rate limiting con Lua/Redis, y observabilidad completa (métricas Prometheus, structured logging).",
+      en: "Multi-tenant authorization service in Go with defense in depth: tenant isolation enforced by Row Level Security plus an AUTH1 trigger, refresh token rotation with family-based reuse detection, a single-query /authorize endpoint, and atomic Lua/Redis rate limiting.",
+      es: "Servicio de autorización multi-tenant en Go con defensa en profundidad: aislamiento de tenants reforzado con Row Level Security más trigger AUTH1, rotación de refresh tokens con detección de reuso por familia, endpoint /authorize de una sola query, y rate limiting atómico con Lua/Redis.",
     },
     stack: ["Go", "PostgreSQL", "Redis", "JWT"],
   },

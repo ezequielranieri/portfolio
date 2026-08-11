@@ -29,5 +29,8 @@
     "better-sqlite3@12.11.1": true,
     "core-js@3.49.0": true,
     "sharp@0.34.5": true
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }

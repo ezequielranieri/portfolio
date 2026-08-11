@@ -9,25 +9,29 @@ import tina from "@tinacms/astro/integration";
 const SITE = process.env.SITE_URL || "http://localhost:4321";
 const POSTS_DIR = resolve(process.cwd(), "content/posts");
 
-function blogSlugs() {
+function blogPages() {
   try {
     const files = readdirSync(POSTS_DIR).filter((f) => f.endsWith(".md"));
-    const slugs = [];
+    const pages = [];
     for (const file of files) {
-      const raw = readFileSync(resolve(POSTS_DIR, file), "utf-8");
-      const m = raw.match(/^---\n[\s\S]*?\nslug:\s*(.+)\n[\s\S]*?\n---\n/);
-      if (m) {
-        const slug = m[1].replace(/^'(.*)'$/, "$1").replace(/^"(.*)"$/, "$1").trim();
-        if (slug) slugs.push(slug);
-      }
+      const raw = readFileSync(resolve(POSTS_DIR, file), "utf-8").replace(/\r\n/g, "\n");
+      const fm = raw.match(/^---\n([\s\S]*?)\n---\n/);
+      if (!fm) continue;
+      const frontmatter = fm[1];
+      const slugMatch = frontmatter.match(/^slug:\s*(.+)$/m);
+      const langMatch = frontmatter.match(/^lang:\s*(en|es)$/m);
+      if (!slugMatch || !langMatch) continue;
+      const slug = slugMatch[1].replace(/^'(.*)'$/, "$1").replace(/^"(.*)"$/, "$1").trim();
+      const lang = langMatch[1].trim();
+      if (slug && lang) pages.push(`${lang}/blog/${slug}`);
     }
-    return slugs;
+    return pages;
   } catch {
     return [];
   }
 }
 
-const postSlugs = blogSlugs();
+const postPages = blogPages();
 
 export default defineConfig({
   site: SITE,
@@ -42,10 +46,7 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      customPages: postSlugs.flatMap((slug) => [
-        `en/blog/${slug}`,
-        `es/blog/${slug}`,
-      ]).map((p) => `${SITE}/${p}`),
+      customPages: postPages.map((p) => `${SITE}/${p}`),
     }),
     tina(),
   ],

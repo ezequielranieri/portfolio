@@ -9,16 +9,19 @@ interface Props {
   locale?: Locale;
   contentLang?: string;
   localeToggleHref?: string;
+  ogType?: string;
 }
 
-const { title = "Ezequiel Ranieri — Ingeniero Backend | AI-Fluent", description = "Portfolio personal de un Ingeniero Backend | AI-Fluent", locale = "es", contentLang, localeToggleHref } = Astro.props;
+const { title = "Ezequiel Ranieri — Ingeniero Backend | AI-Fluent", description = "Portfolio personal de un Ingeniero Backend | AI-Fluent", locale = "es", contentLang, localeToggleHref, ogType = "website" } = Astro.props;
 
 const SITE_URL = process.env.SITE_URL || Astro.url.origin || "";
 const BASE_URL = SITE_URL.replace(/\/$/, "");
 
 const currentPath = Astro.url.pathname;
 const altLocale: Locale = locale === "en" ? "es" : "en";
-const altPath = currentPath.replace(/^\/(en|es)\//, `/${altLocale}/`);
+// On pages with a known translation (e.g. blog posts), the caller passes the exact
+// alternate path via localeToggleHref. Fall back to a locale-prefix swap otherwise.
+const altPath = localeToggleHref || currentPath.replace(/^\/(en|es)\//, `/${altLocale}/`);
 
 const absUrl = (path: string) => `${BASE_URL}${path}`;
 ---
@@ -47,11 +50,16 @@ const absUrl = (path: string) => `${BASE_URL}${path}`;
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={absUrl(currentPath)} />
+    <meta property="og:image" content={absUrl("/og-default.png")} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ezequiel Ranieri — Ingeniero Backend | AI-Fluent" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absUrl("/og-default.png")} />
 
     <link rel="canonical" href={absUrl(currentPath)} />
 

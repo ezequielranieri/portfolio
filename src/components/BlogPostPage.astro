@@ -19,25 +19,20 @@ const tags = post.tags || [];
 const content = post.content || "";
 const date = post.date || "";
 const lang = post.lang || "es";
-const slug = post.slug;
 const translationSlug = post.translationSlug || "";
 const hasTranslation = translationSlug.length > 0;
 const translationLocale: Locale = lang === "es" ? "en" : "es";
 const localeToggleHref = hasTranslation
   ? "/" + translationLocale + "/blog/" + translationSlug
   : "/" + translationLocale + "/blog";
+
+// OG/Twitter meta tags must be absolute URLs. Resolve the cover against the site origin.
+const coverUrl = cover ? new URL(cover, Astro.site ?? "http://localhost:4321").toString() : "";
 ---
 
-<Layout title={title} description={desc} locale={locale} contentLang={lang} localeToggleHref={localeToggleHref}>
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={desc} />
-  <meta property="og:type" content="article" />
-  <meta property="og:url" content={"/" + locale + "/blog/" + slug} />
-  {cover && <meta property="og:image" content={cover} />}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={title} />
-  <meta name="twitter:description" content={desc} />
-  {cover && <meta name="twitter:image" content={cover} />}
+<Layout title={title} description={desc} locale={locale} contentLang={lang} localeToggleHref={localeToggleHref} ogType="article">
+  {cover && <meta property="og:image" content={coverUrl} />}
+  {cover && <meta name="twitter:image" content={coverUrl} />}
 
   <article class="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-24">
     <nav class="mb-12">

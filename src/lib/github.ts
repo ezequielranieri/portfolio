@@ -54,6 +54,13 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Go", "PostgreSQL"],
   },
+  "agro-iam": {
+    description: {
+      en: "Multi-tenant farm management platform in Go with tenant isolation enforced by Postgres Row Level Security (FORCED, not just enabled), refresh token rotation with family-based reuse detection, a tamper-evident audit hash chain, and an embedded demo SPA.",
+      es: "Plataforma agrícola multi-tenant en Go con aislamiento de tenants reforzado por Row Level Security de Postgres (FORCED, no solo habilitada), rotación de refresh tokens con detección de reuso por familia, cadena de hash de auditoría a prueba de manipulación, y una demo SPA embebida.",
+    },
+    stack: ["Go", "PostgreSQL", "JWT", "RLS"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);

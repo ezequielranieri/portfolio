@@ -61,6 +61,13 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Go", "PostgreSQL", "JWT", "RLS"],
   },
+  "agro-agent": {
+    description: {
+      en: "Multi-tenant AI backend for agricultural cooperatives: a tool-calling agent with a deterministic domain router, RAG over documents (pgvector), and human-in-the-loop approval tokens for every write. Evals with a golden set measure tool routing.",
+      es: "Backend IA multi-tenant para cooperativas agrícolas: agente con tool calling y router determinista de dominio, RAG sobre documentos (pgvector), y human-in-the-loop con tokens de aprobación para toda escritura. Evals con golden set miden el routing de tools.",
+    },
+    stack: ["Go", "PostgreSQL", "pgvector", "Gemini", "RAG"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);
@@ -81,7 +88,11 @@ async function buildProjectNames(): Promise<string[]> {
     ? featured.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
-  const remaining = envNames.filter((n) => !fromArticles.includes(n));
+  // Sin GITHUB_FEATURED_REPOS, la base son los repos con override manual:
+  // así los proyectos sin post propio (p. ej. agro-web) igual aparecen.
+  const baseNames = envNames.length > 0 ? envNames : Object.keys(MANUAL_OVERRIDES);
+
+  const remaining = baseNames.filter((n) => !fromArticles.includes(n));
 
   return [...fromArticles, ...remaining];
 }

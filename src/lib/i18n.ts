@@ -13,6 +13,16 @@ export const translations = {
       badgeLabel2: "LFEL1012 Secure AI/ML-Driven Software Development — view credential",
       badgeCaption: "Linux Foundation · 2026",
     },
+    aboutMe: {
+      title: "// about me",
+      paragraphs: [
+        "I'm Ezequiel, a self-taught backend engineer from Salto Grande, Santa Fe, Argentina.",
+        "I started coding to help friends with real needs. Over time I realized what really hooked me was backend systems and security: understanding how solid systems are built, how they are protected, and how they fail.",
+        "I learned on my own. No formal degree, but a lot of curiosity, practice, and a strong need to understand the “why” behind every decision. That led me to become obsessed with clean architecture, well-organized code, and security by design.",
+        "Today I focus on Identity & Access Management, multi-tenant systems, and resilient architectures — combining backend with artificial intelligence. I like building things that can actually be used, and documenting the reasoning behind every choice.",
+        "I’m still learning every day. And that’s what I enjoy most about this path.",
+      ],
+    },
     nav: {
       home: "Home",
       projects: "Projects",
@@ -72,6 +82,16 @@ export const translations = {
       badgeLabel: "LFD121 Developing Secure Software — ver credencial",
       badgeLabel2: "LFEL1012 Secure AI/ML-Driven Software Development — ver credencial",
       badgeCaption: "Linux Foundation · 2026",
+    },
+    aboutMe: {
+      title: "// sobre mí",
+      paragraphs: [
+        "Soy Ezequiel, ingeniero backend autodidacta de Salto Grande, Santa Fe, Argentina.",
+        "Empecé programando para ayudar a amigos con necesidades reales. Con el tiempo me di cuenta de que lo que más me atrapaba era el backend y la seguridad: entender cómo se construyen sistemas sólidos, cómo se protegen y cómo fallan.",
+        "Aprendí por mi cuenta. Sin carrera formal, pero con mucha curiosidad, práctica y ganas de entender el “por qué” detrás de cada decisión. Eso me llevó a obsesionarme con la arquitectura limpia, la organización del código y la seguridad desde el diseño.",
+        "Hoy me enfoco en Identity & Access Management, sistemas multi-tenant y arquitecturas resilientes, combinando backend con inteligencia artificial. Me gusta construir cosas que puedan usarse de verdad y documentar el razonamiento detrás de cada elección.",
+        "Sigo aprendiendo todos los días. Y eso es lo que más me gusta de este camino.",
+      ],
     },
     nav: {
       home: "Home",

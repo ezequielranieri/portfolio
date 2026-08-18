@@ -1,0 +1,23 @@
+---
+import type { Locale } from "../lib/i18n";
+import { translations } from "../lib/i18n";
+
+export interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = translations[locale].aboutMe;
+---
+
+<section id="sobre-mi" class="py-24 scroll-mt-14 sm:scroll-mt-16">
+  <h2 class="section-heading font-mono text-xs tracking-widest uppercase text-ink-dim mb-12">
+    {t.title}
+  </h2>
+
+  {t.paragraphs.map((paragraph, index) => (
+    <p class="text-ink-dim text-sm sm:text-base leading-relaxed mb-4 max-w-2xl" class:list={{ "mb-0": index === t.paragraphs.length - 1 }}>
+      {paragraph}
+    </p>
+  ))}
+</section>

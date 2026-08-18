@@ -77,7 +77,7 @@ agro-agent nunca emite tokens propios: consume los de agro-iam con ingesta accep
 
 ### 4. agro-web: el frontend que completa el ecosistema
 
-El backend no vive solo: **agro-web** es el frontend Next.js que lo consume. El chat con streaming, la vista de lotes y aplicaciones, y el panel de aprobaciones HITL (donde el agrónomo pega el token y aprueba o rechaza). Un detalle de diseño que vale la pena: el frontend proxya las llamadas al backend del lado servidor (`src/app/api/chat/route.ts`), así el navegador jamás ve la URL del backend — una sola superficie pública, sin CORS ni exposición de infraestructura.
+El backend no vive solo: **agro-web** es el frontend Next.js que lo consume. El chat con streaming, la vista de lotes y aplicaciones, y el panel de aprobaciones HITL (donde el agrónomo pega el token y aprueba o rechaza). Un detalle de diseño que vale la pena: el frontend proxya las llamadas al backend del lado servidor (`src/app/api/chat/route.ts`), así el navegador jamás ve la URL del backend — una sola superficie de entrada, sin CORS ni exposición de infraestructura.
 
 ## Qué gana uno con este enfoque
 

@@ -18,7 +18,7 @@ translationOf: mettle-evaluation-framework
 cover: ''
 ---
 
-When I started mettle, the problem was concrete: engineers are building LLM agents at industrial speed, but almost no one is evaluating them seriously. The typical eval is: you run a prompt, see if it looks good, and move on. But that doesn't tell you if your agent is leaking data between tenants, restricting access without leaving evidence of why, distinguishing "doesn't exist" from "exists without data", or resisting indirect prompt injection. I needed a framework that evaluates agents systematically against declared oracles — YAML specs, semantic judge, regression store, and a corpus of 13 scenarios covering the 7 security classes I defined in my ADRs.
+When I started mettle, the problem was concrete: engineers are building LLM agents at industrial speed, but almost no one is evaluating them seriously. The typical eval is: you run a prompt, see if it looks good, and move on. But that doesn't tell you if your agent is leaking data between tenants, restricting access without leaving evidence of why, distinguishing "doesn't exist" from "exists without data", or resisting indirect prompt injection. I needed a framework that evaluates agents systematically against declared oracles — YAML specs, semantic judge, regression store, and a corpus of 11 test scenarios covering the 7 security classes I defined in my ADRs.
 
 I asked myself three questions before writing the first line:
 
@@ -108,14 +108,16 @@ LLMs are stochastic — a single run doesn't characterize a model. Mettle runs m
 
 Every guarantee in the table has its test, and the evals run against the real agent, not mocks.
 
-## Evaluation corpus: 13 scenarios, 7 classes
+## Evaluation corpus: 11 test scenarios, 7 classes
 
 | Suite | Scenarios | What it evaluates |
 |-------|-----------|-------------------|
 | **empty-states** | 3 | Distinguishing "doesn't exist" vs "without data" |
 | **security** | 4 | Cross-tenant, injection, conflict resolution |
 | **protocols** | 2 | Existence-before-query, restrictive wins |
-| **adversarial** | 4 | Tool misuse, direct injection |
+| **adversarial** | 2 | Tool misuse, direct injection |
+
+**Total:** 11 test scenarios + 13 metrics/configs = 24 entries in YAML files.
 
 All 7 classes from ADR-010 are covered: empty states, silent restriction, existence-before-query, conflict resolution, cross-tenant leakage, tool misuse, and prompt injection.
 
@@ -152,7 +154,7 @@ In one run, the agent under test was exploited: facing indirect injection, it ca
 
 ## Conclusion
 
-Mettle proves that evaluating agents isn't "I tried it and it looks good" — it's declaring an oracle, running matrices, and measuring against explicit rules. The 23 ADRs document every decision; the 13 scenarios cover the 7 security classes; and the regression store detects what a single run can't show.
+Mettle proves that evaluating agents isn't "I tried it and it looks good" — it's declaring an oracle, running matrices, and measuring against explicit rules. The 23 ADRs document every decision; the 11 test scenarios cover the 7 security classes; and the regression store detects what a single run can't show.
 
 The lesson repeats itself: **an LLM isn't the place for security guarantees — it's the place for flexibility.** The oracle lives in the spec, routing is measured with evals, and visibility is verified with findings. When every guarantee sits in a deterministic, testable layer, the system stays correct even when the model makes mistakes.
 

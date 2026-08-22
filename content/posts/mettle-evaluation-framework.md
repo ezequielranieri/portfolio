@@ -18,7 +18,7 @@ translationOf: mettle-evaluation-framework-en
 cover: ''
 ---
 
-Cuando empecé mettle, el problema era concreto: los ingenieros están construyendo agentes LLM a velocidad industrial, pero casi nadie los está evaluando en serio. La eval "normal" es: corrés un prompt, ves si se ve bien, y listo. Pero eso no te dice si tu agente está filtrando datos entre tenants, si restringe acceso sin dejar evidencia de por qué, si distingue "no existe" de "existe sin datos", o si resiste inyección de prompts indirecta. Necesitaba un framework que evaluara agentes de forma sistemática contra oráculos declarados — specs en YAML, judge semántico, regression store, y un corpus de 13 escenarios que cubren las 7 clases de seguridad que definí en mis ADRs.
+Cuando empecé mettle, el problema era concreto: los ingenieros están construyendo agentes LLM a velocidad industrial, pero casi nadie los está evaluando en serio. La eval "normal" es: corrés un prompt, ves si se ve bien, y listo. Pero eso no te dice si tu agente está filtrando datos entre tenants, si restringe acceso sin dejar evidencia de por qué, si distingue "no existe" de "existe sin datos", o si resiste inyección de prompts indirecta. Necesitaba un framework que evaluara agentes de forma sistemática contra oráculos declarados — specs en YAML, judge semántico, regression store, y un corpus de 11 escenarios de test que cubren las 7 clases de seguridad que definí en mis ADRs.
 
 Y me hice tres preguntas antes de escribir la primera línea:
 
@@ -108,14 +108,16 @@ Los LLMs son estocásticos — un solo run no caracteriza a un modelo. Mettle co
 
 Cada garantía de la tabla tiene su test, y los evals corren contra el agente real, no contra mocks.
 
-## Corpus de evaluación: 13 escenarios, 7 clases
+## Corpus de evaluación: 11 escenarios de test, 7 clases
 
-| Suite | Escenarios | Qué evalúa |
-|-------|------------|------------|
+| Suite | Scenarios | Qué evalúa |
+|-------|-----------|------------|
 | **empty-states** | 3 | Distinguir "no existe" vs "sin datos" |
 | **security** | 4 | Cross-tenant, inyección, conflict resolution |
 | **protocols** | 2 | Existence-before-query, restrictive wins |
-| **adversarial** | 4 | Tool misuse, inyección directa |
+| **adversarial** | 2 | Tool misuse, inyección directa |
+
+**Total:** 11 escenarios de test + 13 métricas/configs = 24 entradas en archivos YAML.
 
 Las 7 clases de ADR-010 están cubiertas: empty states, silent restriction, existence-before-query, conflict resolution, cross-tenant leakage, tool misuse, y prompt injection.
 
@@ -152,7 +154,7 @@ En una corrida, el agente bajo prueba fue explotado: ante inyección indirecta, 
 
 ## Conclusión
 
-Mettle demuestra que evaluar agentes no es "probé y se ve bien" — es declarar un oráculo, correr matrices, y medir contra reglas explícitas. Los 23 ADRs documentan cada decisión; los 13 escenarios cubren las 7 clases de seguridad; y el regression store detecta lo que un solo run no puede mostrar.
+Mettle demuestra que evaluar agentes no es "probé y se ve bien" — es declarar un oráculo, correr matrices, y medir contra reglas explícitas. Los 23 ADRs documentan cada decisión; los 11 escenarios de test cubren las 7 clases de seguridad; y el regression store detecta lo que un solo run no puede mostrar.
 
 La lección que se repite: **un LLM no es el lugar para las garantías de seguridad — es el lugar para la flexibilidad.** El oráculo vive en el spec, el routing se mide con evals, y la visibilidad se verifica con findings. Cuando cada garantía vive en una capa determinista y testeable, el sistema sigue correcto incluso cuando el modelo se equivoca.
 

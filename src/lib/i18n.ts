@@ -75,8 +75,8 @@ export const translations = {
   es: {
     hero: {
       subtitle: "// INGENIERO BACKEND | SEGURIDAD",
-      tagline: "IAM • SISTEMAS DISTRIBUIDOS • AGENTES IA SEGUROS",
-      bio: "Diseño y construyo sistemas backend seguros y escalables, listos para producción. Combino pensamiento arquitectónico sólido con flujos de trabajo asistidos por IA para entregar soluciones de alta calidad con velocidad y precisión. Mi foco: gestión de identidad y accesos (IAM), sistemas distribuidos, ingeniería de seguridad y Agentes IA Seguros.",
+      tagline: "IAM • SISTEMAS DISTRIBUIDOS • AGENTES DE IA SEGUROS",
+      bio: "Diseño y construyo sistemas backend seguros y escalables, listos para producción. Combino pensamiento arquitectónico sólido con flujos de trabajo asistidos por IA para entregar soluciones de alta calidad con velocidad y precisión. Mi foco: gestión de identidad y accesos (IAM), sistemas distribuidos, ingeniería de seguridad y Agentes de IA Seguros.",
       ctaProjects: "proyectos",
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — ver credencial",

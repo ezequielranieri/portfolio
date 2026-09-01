@@ -4,9 +4,9 @@ export type Locale = (typeof LOCALES)[number];
 export const translations = {
   en: {
     hero: {
-      subtitle: "// backend engineer | AI-Fluent",
-      tagline: "IAM • distributed systems • security",
-      bio: "I design and build secure, scalable, production-grade backend systems — combining strong architectural thinking with modern AI-assisted workflows to deliver high-quality solutions with speed and precision. My focus: Identity & Access Management, distributed systems, and security engineering.",
+      subtitle: "// BACKEND ENGINEER | SECURITY",
+      tagline: "IAM • DISTRIBUTED SYSTEMS • SAFE AI AGENTS",
+      bio: "I design and build secure, scalable, production-grade backend systems — combining strong architectural thinking with modern AI-assisted workflows to deliver high-quality solutions with speed and precision. My focus: Identity & Access Management, distributed systems, security engineering, and Safe AI Agents.",
       ctaProjects: "projects",
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — view credential",
@@ -74,9 +74,9 @@ export const translations = {
   },
   es: {
     hero: {
-      subtitle: "// ingeniero backend | AI-Fluent",
-      tagline: "IAM • sistemas distribuidos • seguridad",
-      bio: "Diseño y construyo sistemas backend seguros y escalables, listos para producción. Combino pensamiento arquitectónico sólido con flujos de trabajo asistidos por IA para entregar soluciones de alta calidad con velocidad y precisión. Mi foco: gestión de identidad y accesos (IAM), sistemas distribuidos, e ingeniería de seguridad.",
+      subtitle: "// INGENIERO BACKEND | SEGURIDAD",
+      tagline: "IAM • SISTEMAS DISTRIBUIDOS • SAFE AI AGENTS",
+      bio: "Diseño y construyo sistemas backend seguros y escalables, listos para producción. Combino pensamiento arquitectónico sólido con flujos de trabajo asistidos por IA para entregar soluciones de alta calidad con velocidad y precisión. Mi foco: gestión de identidad y accesos (IAM), sistemas distribuidos, ingeniería de seguridad y Safe AI Agents.",
       ctaProjects: "proyectos",
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — ver credencial",

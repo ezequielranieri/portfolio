@@ -68,6 +68,13 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Go", "PostgreSQL", "pgvector", "Gemini", "RAG"],
   },
+  "agent-gateway": {
+    description: {
+      en: "Multi-tenant Gateway/Control Plane for LLM agents — the only path between your app and the model. Zero-bypass middleware chain, RLS FORCE tenant isolation, hash-chained audit log, HITL approvals, guardrails (local + external), model routing with fallback/pricing, and WebAssembly tool sandbox.",
+      es: "Gateway/Control Plane multi-tenant para agentes LLM — el único camino entre tu app y el modelo. Cadena middleware zero-bypass, aislamiento tenant con RLS FORCE, audit log hash-chained, aprobaciones HITL, guardrails (local + externo), model routing con fallback/pricing, y tool sandbox WebAssembly.",
+    },
+    stack: ["Go", "PostgreSQL", "Redis", "JWT", "RLS", "WebAssembly", "OpenTelemetry"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);

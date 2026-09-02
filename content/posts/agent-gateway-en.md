@@ -18,7 +18,6 @@ tags:
   - Model Routing
   - Tool Sandbox
   - WebAssembly
-  - Clean Architecture
   - Hexagonal Architecture
   - Observability
 translationOf: agent-gateway

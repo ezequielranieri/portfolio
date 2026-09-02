@@ -27,6 +27,8 @@ cover: ''
 
 Cuando empecé agent-gateway, el problema era concreto: cualquier sistema que opere agentes LLM a escala termina enfrentando tres preguntas incómodas.
 
+> **Estado actual: MVP complete** — Fases 0-8 implementadas (Foundation, Rate Limiting, Audit Log, HITL, Guardrails, **Model Routing**, **Tool Sandbox**, **External Guardrail Classifier**, **CI/CD + Observability**). **Tablas de pricing (migración 0014) sembradas con costos de modelos OpenAI, Anthropic y Ollama**.
+
 1. **¿Cómo garantizás que ninguna llamada saltee el gateway?** Sin una capa de intercepción obligatoria, un `http.Post` directo a un endpoint LLM filtra datos, quema presupuesto y evade todo control.
 2. **¿Cómo los datos, presupuesto y comportamiento de un tenant quedan aislados de otro?** Un `WHERE tenant_id = ?` olvidado en una query, un bucket de rate limit compartido, o un contexto de ejecución de tool filtrado es un incidente cross-tenant — no un bug, una brecha.
 3. **¿Cómo probás qué pasó cuando algo falla?** "Lo hizo el modelo" no es un audit trail. Necesitás logs inmutables de cada llamada al modelo, ejecución de tool, decisión de guardrail y aprobación humana — queryables, reejecutables, a prueba de manipulación.
@@ -217,7 +219,7 @@ type Guardrail interface {
 // internal/adapter/guardrail/local.go — LocalGuardrail: regex, wordlist, PII, injection heuristics
 // Cero red, cero API keys, corre in-process
 
-// internal/adapter/guardrail/external.go — ExternalClassifier adapter (OpenAI Moderation, Anthropic, Llama Guard)
+// internal/adapter/guardrail/external.go — ExternalClassifier adapter (OpenAI Moderation, Anthropic, Llama Guard via Ollama)
 // Implementa retry + circuit breaker, thresholds por categoría
 
 // internal/adapter/guardrail/composite.go — CompositeGuardrail: merge logic (any/all/weighted)
@@ -254,7 +256,7 @@ func (fc *FallbackChain) ChatCompletion(ctx context.Context, req *ChatRequest) (
 }
 ```
 
-`PricingService` usa tablas versionadas `provider + model → USD/1k tokens`. Costos pre-estimados y reales se integran con rate limit y audit.
+`PricingService` usa tablas versionadas `provider + model → USD/1k tokens` (migración 0014 sembrada con costos de OpenAI, Anthropic, Ollama). Costos pre-estimados y reales se integran con rate limit y audit.
 
 ### 6. Tool Sandbox: ToolExecutor + WebAssembly (wazero)
 
@@ -311,4 +313,4 @@ agent-gateway demuestra que operar agentes LLM a escala no requiere "confiar en 
 
 La lección que se repite: **un LLM no es el lugar para las garantías de seguridad — es el lugar para la flexibilidad.** El routing se decide en el router, la escritura se gobierna con HITL, el tenant se aísla en el contexto de transacción, los guardrails viven en una interfaz de dominio, y las tools se ejecutan en un sandbox. Cuando cada garantía vive en una capa determinista y testeable, el sistema sigue correcto incluso cuando el modelo se equivoca.
 
-El código está abierto en [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) con CI verde, docs bilingües, OpenAPI 3.1, y roadmap de 8 fases completado — desde Foundation hasta CI/CD + Observabilidad.
+El código está abierto en [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) con CI verde, docs bilingües, OpenAPI 3.1, 14 migraciones (0001_extensions a 0014_pricing_tables) y roadmap de 8 fases completado — desde Foundation hasta CI/CD + Observabilidad.

@@ -27,6 +27,8 @@ cover: ''
 
 When I started agent-gateway, the problem was concrete: any system running LLM agents at scale eventually faces three uncomfortable questions.
 
+> **Current status: MVP complete** — Phases 0-8 implemented (Foundation, Rate Limiting, Audit Log, HITL, Guardrails, **Model Routing**, **Tool Sandbox**, **External Guardrail Classifier**, **CI/CD + Observability**). **Pricing tables (migration 0014) seeded with OpenAI, Anthropic, and Ollama model costs**.
+
 1. **How do you ensure no call bypasses the gateway?** Without a mandatory interception layer, a single `http.Post` to an LLM endpoint leaks data, burns budget, and evades every control.
 2. **How do one tenant's data, budget, and agent behavior stay isolated from another's?** A missing `WHERE tenant_id = ?` in one query, a shared rate limit bucket, or a leaked tool execution context is a cross-tenant incident — not a bug, a breach.
 3. **How do you prove what happened when something goes wrong?** "The model did it" is not an audit trail. You need immutable logs of every model call, tool execution, guardrail decision, and human approval — queryable, replayable, tamper-evident.
@@ -217,7 +219,7 @@ type Guardrail interface {
 // internal/adapter/guardrail/local.go — LocalGuardrail: regex, wordlist, PII, injection heuristics
 // Zero network, zero API keys, runs in-process
 
-// internal/adapter/guardrail/external.go — ExternalClassifier adapter (OpenAI Moderation, Anthropic, Llama Guard)
+// internal/adapter/guardrail/external.go — ExternalClassifier adapter (OpenAI Moderation, Anthropic, Llama Guard via Ollama)
 // Implements retry + circuit breaker, per-category thresholds
 
 // internal/adapter/guardrail/composite.go — CompositeGuardrail: merge logic (any/all/weighted)
@@ -254,7 +256,7 @@ func (fc *FallbackChain) ChatCompletion(ctx context.Context, req *ChatRequest) (
 }
 ```
 
-`PricingService` uses versioned tables `provider + model → USD/1k tokens`. Pre-estimated and actual costs integrate with rate limit and audit.
+`PricingService` uses versioned tables `provider + model → USD/1k tokens` (migration 0014 seeded with OpenAI, Anthropic, Ollama costs). Pre-estimated and actual costs integrate with rate limit and audit.
 
 ### 6. Tool Sandbox: ToolExecutor + WebAssembly (wazero)
 
@@ -311,4 +313,4 @@ agent-gateway proves that operating LLM agents at scale doesn't require "trustin
 
 The lesson repeats itself: **an LLM isn't the place for security guarantees — it's the place for flexibility.** Routing is decided in the router, writes are governed by HITL, the tenant is isolated in the transaction context, guardrails live in a domain interface, and tools run in a sandbox. When every guarantee sits in a deterministic, testable layer, the system stays correct even when the model makes mistakes.
 
-The code is open at [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) with green CI, bilingual docs, OpenAPI 3.1, and an 8-phase roadmap completed — from Foundation through CI/CD + Observability.
+The code is open at [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) with green CI, bilingual docs, OpenAPI 3.1, 14 migrations (0001_extensions through 0014_pricing_tables), and an 8-phase roadmap completed — from Foundation through CI/CD + Observability.

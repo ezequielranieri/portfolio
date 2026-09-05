@@ -1,5 +1,5 @@
 <div id="terminal-field" aria-hidden="true" style="position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;">
-  <div id="terminal-lines" class="font-mono text-xs leading-[1.6]"></div>
+  <div id="terminal-lines"></div>
 </div>
 
 <script is:inline>
@@ -10,17 +10,40 @@
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const lines = [
-      "$ openssl rand -hex 32",
-      "> POST /auth/token 200 OK",
-      "$ docker ps",
-      "$ curl -X POST /api/verify",
-      "> token rotated \u2713",
-      "$ redis-cli ping",
+      "ez@ez:~$ git status",
+      "> On branch main — up to date",
+      "ez@ez:~$ go build ./...",
+      "> ok in 2.4s",
+      "ez@ez:~$ kubectl get pods -n prod",
+      "> 12 running / 0 pending",
+      "ez@ez:~$ redis-cli ping",
       "> PONG",
-      "$ kubectl get pods",
-      "> 12 running",
-      "$ ssh -i key.pem deploy@host",
-      "> Connected \u2713",
+      "ez@ez:~$ psql -d agro -c 'select count(*) from tenants'",
+      ">  42",
+      "ez@ez:~$ docker compose up -d",
+      "> Started 4 containers ✓",
+      "ez@ez:~$ sqlc generate",
+      "> 12 queries generated",
+      "ez@ez:~$ go test ./... -race",
+      "> ok  3.1s  (42 tests)",
+      "ez@ez:~$ terraform plan",
+      "> Plan: 3 to add, 0 to change",
+      "ez@ez:~$ curl -s localhost:8080/healthz",
+      '> {"status":"ok"}',
+      "ez@ez:~$ kubectl rollout status deploy/iam",
+      '> deployment "iam" successfully rolled out',
+      "ez@ez:~$ openssl rand -hex 32",
+      "> c4f3…b91 (rotated)",
+      "ez@ez:~$ ssh deploy@prod",
+      "> Connected ✓",
+      "ez@ez:~$ git push origin main",
+      "> main → origin (fast-forward)",
+      "ez@ez:~$ go vet ./...",
+      "> no issues found",
+      "ez@ez:~$ make migrate",
+      "> migrations applied (2026.09.05)",
+      "ez@ez:~$ cd ~/agro-agent && go run ./cmd/api",
+      "> listening on :8080 ✓",
     ];
 
     if (prefersReduced) {
@@ -32,10 +55,9 @@
       return;
     }
 
-    const MAX_VISIBLE = 20;
+    const MAX_VISIBLE = 26;
     let lineIndex = 0;
     let charIndex = 0;
-    let isPaused = false;
     let currentEl = null;
     let timeoutId = null;
 
@@ -54,13 +76,11 @@
     }
 
     function tick() {
-      if (isPaused) return;
-
       if (!currentEl) {
         currentEl = addLine();
       }
 
-      const line = lines[lineIndex];
+      const line = lines[lineIndex % lines.length];
 
       if (charIndex === 0) {
         currentEl.textContent = "";
@@ -69,23 +89,23 @@
       if (charIndex < line.length) {
         currentEl.textContent = line.slice(0, charIndex + 1) + "\u007C";
         charIndex++;
-        scheduleTick(30 + Math.random() * 50);
+        schedule(30 + Math.random() * 50);
       } else {
         currentEl.textContent = line;
-        if (currentEl) completeLine(currentEl);
+        completeLine(currentEl);
         lineIndex = (lineIndex + 1) % lines.length;
         charIndex = 0;
         currentEl = null;
-        scheduleTick(600 + Math.random() * 400);
+        schedule(700 + Math.random() * 500);
       }
     }
 
-    function scheduleTick(delay) {
+    function schedule(delay) {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(tick, delay);
     }
 
-    scheduleTick(500);
+    schedule(500);
   })();
 </script>
 
@@ -94,11 +114,13 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    right: 0;
     padding: 2rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
     color: var(--color-ink);
     user-select: none;
   }
@@ -107,6 +129,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin: 0;
     opacity: 0.12;
     transition: opacity 0.4s ease;
   }

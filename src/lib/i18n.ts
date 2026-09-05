@@ -11,7 +11,8 @@ export const translations = {
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — view credential",
       badgeLabel2: "LFEL1012 Secure AI/ML-Driven Software Development — view credential",
-      badgeCaption: "Linux Foundation · 2026",
+      badgeCaption: "Verified by Linux Foundation",
+      badgeTitle: "Certifications",
     },
     aboutMe: {
       title: "// about me",
@@ -81,7 +82,8 @@ export const translations = {
       ctaBlog: "blog",
       badgeLabel: "LFD121 Developing Secure Software — ver credencial",
       badgeLabel2: "LFEL1012 Secure AI/ML-Driven Software Development — ver credencial",
-      badgeCaption: "Linux Foundation · 2026",
+      badgeCaption: "Verificado por Linux Foundation",
+      badgeTitle: "Certificaciones",
     },
     aboutMe: {
       title: "// sobre mí",

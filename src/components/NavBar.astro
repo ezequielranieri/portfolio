@@ -15,10 +15,23 @@ const toggleHref = localeToggleHref || "/" + other + "/";
 
 <nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-sm" id="navbar">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-    <a href={"/" + locale + "/"} class="text-ink hover:text-ink-dim transition-colors duration-150 flex items-center shrink-0">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2304 1536" class="h-10 w-auto">
+    <a href={"/" + locale + "/"} class="text-ink flex items-center shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2304 1536" class="h-10 w-auto logo-chromed">
+        <defs>
+          <linearGradient id="chromed-logo" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="objectBoundingBox">
+            <stop offset="0%" stop-color="#ff2e6b">
+              <animate attributeName="stop-color" values="#ff2e6b;#7a5cff;#2bc5a5;#ff2e6b" dur="14s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="50%" stop-color="#7a5cff">
+              <animate attributeName="stop-color" values="#7a5cff;#2bc5a5;#ff2e6b;#7a5cff" dur="14s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="100%" stop-color="#2bc5a5">
+              <animate attributeName="stop-color" values="#2bc5a5;#ff2e6b;#7a5cff;#2bc5a5" dur="14s" repeatCount="indefinite" />
+            </stop>
+          </linearGradient>
+        </defs>
         <g transform="translate(0,1536) scale(0.1,-0.1)">
-          <path id="logo-path" class="logo-path" fill="currentColor" d="M11730 12379 c-1008 -25 -2075 -230 -2880 -552 -667 -266 -1306 -670
+          <path id="logo-path" class="logo-path" fill="url(#chromed-logo)" d="M11730 12379 c-1008 -25 -2075 -230 -2880 -552 -667 -266 -1306 -670
 -1824 -1151 -154 -143 -388 -396 -521 -561 -219 -274 -463 -672 -619 -1012
 -361 -785 -491 -1534 -390 -2241 9 -62 15 -114 13 -116 -2 -2 -166 -56 -364
 -121 -570 -185 -959 -331 -1185 -445 -93 -47 -126 -76 -108 -98 26 -31 132 -8
@@ -117,6 +130,23 @@ c174 88 654 270 997 378 195 61 456 129 605 158 189 36 180 32 139 58 -31 20
 </nav>
 
 <style>
+  .logo-chromed {
+    filter: saturate(1.2);
+    transition: filter 300ms ease-out;
+  }
+  .logo-chromed:hover {
+    filter: saturate(1.6) brightness(1.1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-chromed {
+      animation: none;
+    }
+    /* Frena la animación SMIL de los stops (el bloque global de
+       reduced-motion solo cubre animaciones CSS, no <animate>) */
+    #chromed-logo stop {
+      stop-color: #f2f2f0 !important;
+    }
+  }
   .nav-link::after {
     content: "";
     position: absolute;

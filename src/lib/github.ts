@@ -75,6 +75,13 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Go", "PostgreSQL", "Redis", "JWT", "RLS", "WebAssembly", "OpenTelemetry"],
   },
+  "mettle": {
+    description: {
+      en: "Agent Evaluation & Safety Framework: measure and control LLM agents systematically. Declarative YAML specs, authorization oracles, visibility checks, LLM-as-judge, a regression store, and CI gates. Built in Go.",
+      es: "Framework de evaluación y seguridad de agentes: medí y controlá agentes LLM sistemáticamente. Specs declarativas en YAML, oráculos de autorización, chequeos de visibilidad, LLM-as-judge, un store de regresión y CI gates. Construido en Go.",
+    },
+    stack: ["Go", "YAML", "LLM", "Evaluation"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);
@@ -95,13 +102,15 @@ async function buildProjectNames(): Promise<string[]> {
     ? featured.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
 
-  // Sin GITHUB_FEATURED_REPOS, la base son los repos con override manual:
-  // así los proyectos sin post propio (p. ej. agro-web) igual aparecen.
-  const baseNames = envNames.length > 0 ? envNames : Object.keys(MANUAL_OVERRIDES);
+  // Siempre se muestran solo los proyectos que tienen artículo publicado.
+  // Si GITHUB_FEATURED_REPOS está configurada (producción), se usa solo para
+  // definir el ORDEN preferido, filtrando los proyectos que no tienen post.
+  // Sin la env var, se usan directamente los proyectos con artículo.
+  if (envNames.length > 0) {
+    return envNames.filter((n) => fromArticles.includes(n));
+  }
 
-  const remaining = baseNames.filter((n) => !fromArticles.includes(n));
-
-  return [...fromArticles, ...remaining];
+  return fromArticles;
 }
 
 function placeholderProjects(names: string[]): Project[] {

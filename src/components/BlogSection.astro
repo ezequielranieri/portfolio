@@ -65,9 +65,10 @@ const latest = groups;
         const locales = [primary.lang];
         if (translation) locales.push(translation.lang);
         return (
+        <div class="chromed-frame h-full group transition duration-150 hover:-translate-y-0.5">
         <a
           href={"/" + primary.lang + "/blog/" + primary.slug}
-          class="border border-line p-5 sm:p-6 flex flex-col h-full hover:bg-bg-raised hover:-translate-y-0.5 transition duration-150 group"
+          class="block bg-bg p-5 sm:p-6 flex flex-col h-full hover:bg-bg-raised transition duration-150 group"
         >
           <div class="flex items-center gap-2 mb-3 flex-wrap">
             <time class="font-mono text-xs tracking-wider text-ink-dim">
@@ -79,7 +80,7 @@ const latest = groups;
             ))}
           </div>
 
-          <h3 class="font-display text-base tracking-tight text-ink group-hover:text-ink-dim transition-colors duration-150 uppercase mb-2">
+          <h3 class="font-display text-base tracking-tight chromed-text chromed-hover uppercase mb-2">
             {primary.title}
           </h3>
 
@@ -95,6 +96,7 @@ const latest = groups;
             ))}
           </div>
         </a>
+        </div>
         );
       })}
     </div>

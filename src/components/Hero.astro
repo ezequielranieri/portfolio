@@ -18,13 +18,16 @@ const s = translations[locale].nav;
     <p class="font-mono text-xs sm:text-sm tracking-widest uppercase text-ink-dim mb-6">
       {t.subtitle}
     </p>
-    <h1 class="font-display text-[clamp(2.5rem,8vw,6rem)] leading-[1.05] tracking-tight text-ink select-none">
+    <h1 class="font-display text-[clamp(2.5rem,8vw,6rem)] leading-[1.05] tracking-tight select-none chromed-text">
       EZEQUIEL<br />RANIERI
     </h1>
-    <p class="mt-4 font-mono text-xs tracking-widest uppercase text-accent select-none">
+    <p class="mt-4 font-mono text-xs tracking-widest uppercase text-ink select-none">
       {t.tagline}
     </p>
     <div class="mt-6 flex flex-col items-center select-none">
+      <p class="font-mono text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-ink-dim mb-3">
+        {t.badgeCaption}
+      </p>
       <div class="flex items-center justify-center gap-4">
         <a
           href="https://www.credly.com/badges/6cfd4b7b-97a2-41ba-a9aa-dae369f89453"
@@ -57,9 +60,6 @@ const s = translations[locale].nav;
           />
         </a>
       </div>
-      <p class="mt-1.5 font-mono text-[11px] tracking-widest uppercase text-ink-dim">
-        {t.badgeCaption}
-      </p>
     </div>
     <p class="mt-6 max-w-md mx-auto text-ink-dim text-sm sm:text-base leading-relaxed" style="color: var(--color-ink-dim);">
       {t.bio}
@@ -67,15 +67,19 @@ const s = translations[locale].nav;
     <div class="mt-10 flex flex-wrap gap-3 justify-center">
       <a
         href={"/" + locale + "/#proyectos"}
-        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider border border-line text-ink-dim hover:bg-ink hover:text-bg transition-colors duration-150"
+        class="chromed-frame inline-flex"
       >
-        {t.ctaProjects}
+        <span class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider bg-bg text-ink-dim hover:bg-ink hover:text-bg transition-colors duration-150">
+          {t.ctaProjects}
+        </span>
       </a>
       <a
         href={"/" + locale + "/#blog"}
-        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider border border-line text-ink-dim hover:bg-ink hover:text-bg transition-colors duration-150"
+        class="chromed-frame inline-flex"
       >
-        {t.ctaBlog}
+        <span class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-mono tracking-wider bg-bg text-ink-dim hover:bg-ink hover:text-bg transition-colors duration-150">
+          {t.ctaBlog}
+        </span>
       </a>
     </div>
   </div>

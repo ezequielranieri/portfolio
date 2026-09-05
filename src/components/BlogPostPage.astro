@@ -50,7 +50,7 @@ const coverUrl = cover ? new URL(cover, Astro.site ?? "http://localhost:4321").t
           {tags.map((tag) => <span class="px-2 py-0.5 text-[11px] font-mono tracking-wider uppercase border border-line text-ink-dim">{tag}</span>)}
         </div>
       </div>
-      <h1 class="font-display text-3xl sm:text-4xl tracking-tight text-ink uppercase leading-[1.1]">{post.title}</h1>
+      <h1 class="font-display text-3xl sm:text-4xl tracking-tight uppercase leading-[1.1] chromed-text chromed-hover-static">{post.title}</h1>
     </header>
 
     {cover && cover.length > 1 && <img src={cover} alt={post.title} class="w-full border border-line mb-10" loading="eager" />}

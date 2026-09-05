@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "tinacms dev -c \"astro dev\"",
-    "build": "tinacms build --skip-cloud-checks && astro build",
+    "build": "tinacms build --skip-cloud-checks --skip-indexing && astro build",
     "build:local": "tinacms build --skip-cloud-checks --skip-indexing && astro build",
     "preview": "astro preview"
   },
@@ -19,6 +19,7 @@
     "astro": "^5.7.0",
     "marked": "^18.0.6",
     "node-addon-api": "^8.9.2",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.1.0",
     "tinacms": "^3.10.0"
   },

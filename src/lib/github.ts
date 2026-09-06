@@ -70,8 +70,8 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
   },
   "agent-gateway": {
     description: {
-      en: "Multi-tenant Gateway/Control Plane for LLM agents — the only path between your app and the model. Zero-bypass middleware chain, RLS FORCE tenant isolation, hash-chained audit log, HITL approvals, guardrails (local + external), model routing with fallback/pricing, and WebAssembly tool sandbox.",
-      es: "Gateway/Control Plane multi-tenant para agentes LLM — el único camino entre tu app y el modelo. Cadena middleware zero-bypass, aislamiento tenant con RLS FORCE, audit log hash-chained, aprobaciones HITL, guardrails (local + externo), model routing con fallback/pricing, y tool sandbox WebAssembly.",
+      en: "Multi-tenant Gateway/Control Plane for LLM agents — the only path between your app and the model. Zero-bypass middleware chain, RLS FORCE tenant isolation, hash-chained audit log, HITL approvals, guardrails (local + external), model routing with fallback/pricing, WebAssembly tool sandbox, and secure agent-to-agent delegation (scope intersection, fail-closed middleware, chain revocation).",
+      es: "Gateway/Control Plane multi-tenant para agentes LLM — el único camino entre tu app y el modelo. Cadena middleware zero-bypass, aislamiento tenant con RLS FORCE, audit log hash-chained, aprobaciones HITL, guardrails (local + externo), model routing con fallback/pricing, tool sandbox WebAssembly, y delegación segura agente-a-agente (intersección de scope, middleware fail-closed, revocación de cadena).",
     },
     stack: ["Go", "PostgreSQL", "Redis", "JWT", "RLS", "WebAssembly", "OpenTelemetry"],
   },

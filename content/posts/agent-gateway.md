@@ -20,13 +20,14 @@ tags:
   - WebAssembly
   - Hexagonal Architecture
   - Observability
+  - Agent Delegation
 translationOf: agent-gateway-en
 cover: ''
 ---
 
 Cuando empecé agent-gateway, el problema era concreto: cualquier sistema que opere agentes LLM a escala termina enfrentando tres preguntas incómodas.
 
-> **Estado actual: MVP complete** — Fases 0-8 implementadas (Foundation, Rate Limiting, Audit Log, HITL, Guardrails, **Model Routing**, **Tool Sandbox**, **External Guardrail Classifier**, **CI/CD + Observability**). **Tablas de pricing (migración 0014) sembradas con costos de modelos OpenAI, Anthropic y Ollama**.
+> **Estado actual: MVP complete** — Fases 0-9 implementadas (Foundation, Rate Limiting, Audit Log, HITL, Guardrails, **Model Routing**, **Tool Sandbox**, **External Guardrail Classifier**, **CI/CD + Observability**, **Delegación Segura de Agentes**). **Tablas de pricing (migración 0014) sembradas con costos de modelos OpenAI, Anthropic y Ollama**. **17 migraciones (0001_extensions a 0017_delegation_grants_generation)**.
 
 1. **¿Cómo garantizás que ninguna llamada saltee el gateway?** Sin una capa de intercepción obligatoria, un `http.Post` directo a un endpoint LLM filtra datos, quema presupuesto y evade todo control.
 2. **¿Cómo los datos, presupuesto y comportamiento de un tenant quedan aislados de otro?** Un `WHERE tenant_id = ?` olvidado en una query, un bucket de rate limit compartido, o un contexto de ejecución de tool filtrado es un incidente cross-tenant — no un bug, una brecha.
@@ -36,9 +37,9 @@ La tentación era la de siempre: poner un proxy sencillo delante del modelo y co
 
 ## El problema de confiar en "nadie va a hacer trampa"
 
-En un sistema multi-tenant con agentes LLM, el error clásico no es un ataque sofisticado: es una llamada directa que saltea los controles. Un desarrollador con prisa hace `openai.ChatCompletion.Create(...)` desde un handler y ya — saltó auth, tenant, rate limit, audit, guardrails. Una query sin `tenant_id` lee datos de otro tenant. Un rate limit global deja que un usuario ruidoso agote la cuota de todos.
+En un sistema multi-tenant con agentes LLM, el error clásico no es un ataque sofisticado: es una llamada directa que saltea los controles. Un desarrollador con prisa hace `openai.ChatCompletion.Create(...)` desde un handler y ya — saltó auth, tenant, delegation, rate limit, audit, guardrails. Una query sin `tenant_id` lee datos de otro tenant. Un rate limit global deja que un usuario ruidoso agote la cuota de todos.
 
-agent-gateway ataca eso con **zero-bypass por construcción**: la cadena de middleware chi (`auth → tenant → ratelimit → audit → guardrails → model router`) es la **única** forma de llegar al modelo. No hay endpoint alternativo, no hay "atajo", no hay flag para desactivarlo.
+agent-gateway ataca eso con **zero-bypass por construcción**: la cadena de middleware chi (`auth → tenant → delegation → ratelimit → audit → guardrails → hitl`) es la **única** forma de llegar al modelo. No hay endpoint alternativo, no hay "atajo", no hay flag para desactivarlo.
 
 ```go
 // cmd/gateway/main.go — composition root: la cadena es inmutable
@@ -53,10 +54,11 @@ func main() {
     // La cadena zero-bypass — el orden importa y no se negocia
     r.Use(mw.Auth(jwtSvc))        // 1. Valida JWT HS256, extrae claims
     r.Use(mw.Tenant(tenantSvc))   // 2. Resuelve tenant, setea app.tenant_id (LOCAL tx)
-    r.Use(mw.RateLimit(rlSvc))    // 3. 3 buckets: reqs/min, tokens/min, tool_execs/min
-    r.Use(mw.Audit(auditSvc))     // 4. Append-only + hash-chain per tenant
-    r.Use(mw.Guardrails(gSvc))    // 5. Local + external classifier, input/output
-    r.Use(mw.HITL(hitlSvc))       // 6. Intercepta tools que requieren aprobación
+    r.Use(mw.Delegation(delSvc))  // 3. Fail-closed delegation: parent ∩ granted scope intersection
+    r.Use(mw.RateLimit(rlSvc))    // 4. 3 buckets: reqs/min, tokens/min, tool_execs/min
+    r.Use(mw.Audit(auditSvc))     // 5. Append-only + hash-chain per tenant
+    r.Use(mw.Guardrails(gSvc))    // 6. Local + external classifier, input/output
+    r.Use(mw.HITL(hitlSvc))       // 7. Intercepta tools que requieren aprobación
 
     // Solo después de la cadena completa: model router
     r.Route("/v1", func(r chi.Router) {
@@ -277,11 +279,30 @@ type ToolExecutor interface {
 
 El agente no ejecuta código arbitrario: el gateway valida, sandboxea, audita, rate-limita y pide aprobación humana si el tool lo requiere.
 
+### 7. Delegación segura de agentes: el scope se intersecta, nunca se amplía
+
+Cuando un agente delega trabajo en un agente hijo, el hijo no "hereda" los permisos del padre: recibe un **grant** cuyo scope efectivo es `parent ∩ granted` (intersección), computada por el gateway — nunca una unión. Un hijo no puede ganar permisos que el padre no tenía, y el agente no calcula su propio scope: lo calcula el middleware.
+
+```go
+// internal/middleware/delegation.go — el gateway computa, el agente no decide
+effective, err := delegation.ValidateScopeIntersection(parentScope, grant.GrantedScope)
+// parent ∩ granted — si la intersección queda vacía, la delegación se bloquea
+```
+
+- **Fail-closed, no fail-open**: el middleware va después de la resolución de tenant y antes del rate limit (`FailOpen: false`), con `MaxDepth 5` / `MaxFanOut 10` por hop. Dependencias nil panic en el composition root (fail-fast) — no hay bypass silencioso.
+- **Lifecycle persistido en columnas tipadas**: `issued → active → revoked/expired/consumed`. El envelope se persiste en full en `delegation_grants` (tenanted, RLS FORCE, PK compuesta `(id, tenant_id)`) — migraciones 0015-0017. No hay columna hash-only: el storage son los propios campos del grant.
+- **Revocación de cadena por generation counter**: revocar cualquier grant de la cadena incrementa la generación de la cadena; cada chequeo del middleware compara la generación actual contra la de emisión. Revocás root+mid+leaf y todo el subárbol queda revocado — un grant emitido antes de la revocación se rechaza como replay.
+- **Presupuesto por cadena en Redis**: pool compartido por chain, decremento atómico con Lua, con el mismo fail-fast ante dependencias faltantes (anti-fail-open).
+- **`root_intent` y `hitl_classification` inmutables desde la acción raíz**: HITL evalúa contra la intención raíz, nunca contra una acción actual re-empaquetada.
+- **Probado contra infraestructura real**: la cadena de 3 hops (`root → mid → leaf`) corre en CI contra Postgres 16 + Redis 7 (`go test -count=1 -run 'Delegation' ./test/integration/`).
+
+**Nota de honestidad técnica**: el transporte del grant por JWT es el *diseño* de AD-013, todavía no cableado a producción — no hay endpoint de emisión de grants y `SetGrantInContext` no tiene callers en producción. Lo implementado es el envelope persistido en columnas tipadas bajo RLS FORCE; el JWT como carrier firmado es el hardening planificado.
+
 ## Qué gana uno con este enfoque
 
 | Garantía | Cómo se logra |
 |---|---|
-| Ninguna llamada saltea el gateway | Cadena middleware inmutable (auth→tenant→ratelimit→audit→guardrails→router) en composition root |
+| Ninguna llamada saltea el gateway | Cadena middleware inmutable (auth→tenant→delegation→ratelimit→audit→guardrails→hitl) en composition root |
 | Aislamiento de tenant a prueba de bugs | RLS FORCE + PK compuesta `(id, tenant_id)` + `set_config(..., true)` LOCAL tx + middleware cross-check |
 | Audit trail inmutable y verificable | Append-only + hash-chaining por tenant (`seq`, `prev_hash`, `chain_hash`) + `VerifyChain` detector |
 | El modelo no muta datos sin humano | HITL: request `PENDING` + token opaco (SHA-256) + re-validación completa al aprobar + transacción atómica |
@@ -290,6 +311,7 @@ El agente no ejecuta código arbitrario: el gateway valida, sandboxea, audita, r
 | Guardrails extensibles sin tocar dominio | Interfaz `Guardrail` + `LocalGuardrail` (regex/PII) + `ExternalClassifier` adapter + `CompositeGuardrail` merge |
 | Fallback de modelo con control de costo | Provider port + `FallbackChain` (bounded retry + circuit breaker) + `PricingService` versionado + pre/post cost tracking |
 | Tools aislados del host y otros tenants | `ToolExecutor` port + `WasmExecutor` (wazero) fuel/memory/time/FS/network limits + bounded loop + HITL gate |
+| Delegación sin ampliar privilegios | Grants parent→child con scope efectivo = parent ∩ granted (nunca se amplía), middleware fail-closed, revocación de cadena por generation counter, presupuesto atómico en Redis |
 | Observabilidad sin vendor lock-in | OpenTelemetry stdout + Prometheus `/metrics` + Grafana dashboards auto-provisionados + Loki/Promtail + Jaeger |
 | CI/CD con secretos seguros | GitHub Actions + SOPS/age (`.env.enc` en repo) + canary deploy script + cosign signing |
 
@@ -308,8 +330,8 @@ La decisión de no sumar infra prematura está documentada en `DECISIONS.md`. Si
 
 ## Conclusión
 
-agent-gateway demuestra que operar agentes LLM a escala no requiere "confiar en que nadie hace trampa". Requiere **arquitectura zero-bypass** (la cadena middleware es la única forma de llegar al modelo), **aislamiento estructural en la base de datos** (RLS FORCE + PK compuesta, no un WHERE), **auditoría que sobrevive al compromiso** (hash-chaining por tenant), y **controles reutilizables como servicios de dominio** (HITL, guardrails, routing, sandbox) — no lógica dispersa en handlers.
+agent-gateway demuestra que operar agentes LLM a escala no requiere "confiar en que nadie hace trampa". Requiere **arquitectura zero-bypass** (la cadena middleware es la única forma de llegar al modelo), **aislamiento estructural en la base de datos** (RLS FORCE + PK compuesta, no un WHERE), **auditoría que sobrevive al compromiso** (hash-chaining por tenant), y **controles reutilizables como servicios de dominio** (HITL, guardrails, routing, sandbox, delegación segura entre agentes) — no lógica dispersa en handlers.
 
-La lección que se repite: **un LLM no es el lugar para las garantías de seguridad — es el lugar para la flexibilidad.** El routing se decide en el router, la escritura se gobierna con HITL, el tenant se aísla en el contexto de transacción, los guardrails viven en una interfaz de dominio, y las tools se ejecutan en un sandbox. Cuando cada garantía vive en una capa determinista y testeable, el sistema sigue correcto incluso cuando el modelo se equivoca.
+La lección que se repite: **un LLM no es el lugar para las garantías de seguridad — es el lugar para la flexibilidad.** El routing se decide en el router, la escritura se gobierna con HITL, el tenant se aísla en el contexto de transacción, los guardrails viven en una interfaz de dominio, las tools se ejecutan en un sandbox, y la delegación intersecta scopes — nunca los amplía. Cuando cada garantía vive en una capa determinista y testeable, el sistema sigue correcto incluso cuando el modelo se equivoca.
 
-El código está abierto en [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) con CI verde, docs bilingües, OpenAPI 3.1, 14 migraciones (0001_extensions a 0014_pricing_tables) y roadmap de 8 fases completado — desde Foundation hasta CI/CD + Observabilidad.
+El código está abierto en [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) con CI verde, docs bilingües, OpenAPI 3.1, 17 migraciones (0001_extensions a 0017_delegation_grants_generation) y roadmap de 9 fases completado — desde Foundation hasta Delegación Segura de Agentes.

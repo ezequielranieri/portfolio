@@ -20,13 +20,14 @@ tags:
   - WebAssembly
   - Hexagonal Architecture
   - Observability
+  - Agent Delegation
 translationOf: agent-gateway
 cover: ''
 ---
 
 When I started agent-gateway, the problem was concrete: any system running LLM agents at scale eventually faces three uncomfortable questions.
 
-> **Current status: MVP complete** — Phases 0-8 implemented (Foundation, Rate Limiting, Audit Log, HITL, Guardrails, **Model Routing**, **Tool Sandbox**, **External Guardrail Classifier**, **CI/CD + Observability**). **Pricing tables (migration 0014) seeded with OpenAI, Anthropic, and Ollama model costs**.
+> **Current status: MVP complete** — Phases 0-9 implemented (Foundation, Rate Limiting, Audit Log, HITL, Guardrails, **Model Routing**, **Tool Sandbox**, **External Guardrail Classifier**, **CI/CD + Observability**, **Secure Agent Delegation**). **Pricing tables (migration 0014) seeded with OpenAI, Anthropic, and Ollama model costs**. **17 migrations (0001_extensions through 0017_delegation_grants_generation)**.
 
 1. **How do you ensure no call bypasses the gateway?** Without a mandatory interception layer, a single `http.Post` to an LLM endpoint leaks data, burns budget, and evades every control.
 2. **How do one tenant's data, budget, and agent behavior stay isolated from another's?** A missing `WHERE tenant_id = ?` in one query, a shared rate limit bucket, or a leaked tool execution context is a cross-tenant incident — not a bug, a breach.
@@ -36,9 +37,9 @@ The temptation was the usual move: put a simple proxy in front of the model and 
 
 ## The problem with trusting "no one will cheat"
 
-In a multi-tenant system with LLM agents, the classic failure isn't a sophisticated attack: it's a direct call that bypasses controls. A rushed developer does `openai.ChatCompletion.Create(...)` from a handler and done — skipped auth, tenant, rate limit, audit, guardrails. A query without `tenant_id` reads another tenant's data. A global rate limit lets one noisy user exhaust everyone's quota.
+In a multi-tenant system with LLM agents, the classic failure isn't a sophisticated attack: it's a direct call that bypasses controls. A rushed developer does `openai.ChatCompletion.Create(...)` from a handler and done — skipped auth, tenant, delegation, rate limit, audit, guardrails. A query without `tenant_id` reads another tenant's data. A global rate limit lets one noisy user exhaust everyone's quota.
 
-agent-gateway attacks this with **zero-bypass by construction**: the chi middleware chain (`auth → tenant → ratelimit → audit → guardrails → model router`) is the **only** way to reach the model. No alternative endpoint, no "shortcut," no flag to disable it.
+agent-gateway attacks this with **zero-bypass by construction**: the chi middleware chain (`auth → tenant → delegation → ratelimit → audit → guardrails → hitl`) is the **only** way to reach the model. No alternative endpoint, no "shortcut," no flag to disable it.
 
 ```go
 // cmd/gateway/main.go — composition root: the chain is immutable
@@ -53,10 +54,11 @@ func main() {
     // The zero-bypass chain — order matters and is non-negotiable
     r.Use(mw.Auth(jwtSvc))        // 1. Validate JWT HS256, extract claims
     r.Use(mw.Tenant(tenantSvc))   // 2. Resolve tenant, set app.tenant_id (LOCAL tx)
-    r.Use(mw.RateLimit(rlSvc))    // 3. 3 buckets: reqs/min, tokens/min, tool_execs/min
-    r.Use(mw.Audit(auditSvc))     // 4. Append-only + hash-chain per tenant
-    r.Use(mw.Guardrails(gSvc))    // 5. Local + external classifier, input/output
-    r.Use(mw.HITL(hitlSvc))       // 6. Intercept tools requiring approval
+    r.Use(mw.Delegation(delSvc))  // 3. Fail-closed delegation: parent ∩ granted scope intersection
+    r.Use(mw.RateLimit(rlSvc))    // 4. 3 buckets: reqs/min, tokens/min, tool_execs/min
+    r.Use(mw.Audit(auditSvc))     // 5. Append-only + hash-chain per tenant
+    r.Use(mw.Guardrails(gSvc))    // 6. Local + external classifier, input/output
+    r.Use(mw.HITL(hitlSvc))       // 7. Intercept tools requiring approval
 
     // Only after the full chain: model router
     r.Route("/v1", func(r chi.Router) {
@@ -277,11 +279,30 @@ type ToolExecutor interface {
 
 The agent doesn't run arbitrary code: the gateway validates, sandboxes, audits, rate-limits, and asks for human approval if the tool requires it.
 
+### 7. Secure Agent Delegation: scope is intersected, never widened
+
+When an agent delegates work to a child agent, the child doesn't "inherit" the parent's permissions: it receives a **grant** whose effective scope is `parent ∩ granted` (intersection), computed gateway-side — never a union. A child can't gain permissions the parent didn't have, and the agent doesn't compute its own scope: the middleware does.
+
+```go
+// internal/middleware/delegation.go — the gateway computes, the agent doesn't decide
+effective, err := delegation.ValidateScopeIntersection(parentScope, grant.GrantedScope)
+// parent ∩ granted — if the intersection is empty, delegation is blocked
+```
+
+- **Fail-closed, not fail-open**: the middleware sits after tenant resolution and before rate limiting (`FailOpen: false`), with `MaxDepth 5` / `MaxFanOut 10` per hop. Nil dependencies panic in the composition root (fail-fast) — no silent bypass.
+- **Lifecycle persisted in typed columns**: `issued → active → revoked/expired/consumed`. The envelope is persisted in full in `delegation_grants` (tenanted, RLS FORCE, composite PK `(id, tenant_id)`) — migrations 0015-0017. There is no hash-only column: the storage is the grant's own fields.
+- **Chain revocation via generation counter**: revoking any grant in the chain bumps the chain generation; every middleware check compares the current generation against the one at issuance. Revoke root+mid+leaf and the whole subtree is revoked — a grant issued before the revocation is rejected as replay.
+- **Per-chain budget in Redis**: pool shared per chain, atomic Lua decrement, with the same fail-fast on missing dependencies (anti-fail-open).
+- **`root_intent` and `hitl_classification` immutable from the root action**: HITL evaluates against root intent, never a re-packaged current action.
+- **Tested against real infrastructure**: the 3-hop chain (`root → mid → leaf`) runs in CI against Postgres 16 + Redis 7 (`go test -count=1 -run 'Delegation' ./test/integration/`).
+
+**Honesty note**: JWT transport of the grant is the *design* of AD-013, not wired to production yet — there is no grant-issuance endpoint and `SetGrantInContext` has zero production callers. What's implemented is the envelope persisted in typed columns under RLS FORCE; JWT as a signed carrier is the planned hardening.
+
 ## What you gain with this approach
 
 | Guarantee | How it's achieved |
 |---|---|
-| No call bypasses the gateway | Immutable middleware chain (auth→tenant→ratelimit→audit→guardrails→router) in composition root |
+| No call bypasses the gateway | Immutable middleware chain (auth→tenant→delegation→ratelimit→audit→guardrails→hitl) in composition root |
 | Tenant isolation survives bugs | RLS FORCE + composite PK `(id, tenant_id)` + `set_config(..., true)` LOCAL tx + middleware cross-check |
 | Immutable, verifiable audit trail | Append-only + per-tenant hash-chaining (`seq`, `prev_hash`, `chain_hash`) + `VerifyChain` detector |
 | Model can't mutate data without human | HITL: `PENDING` request + opaque token (SHA-256) + full re-validation on approve + atomic transaction |
@@ -290,6 +311,7 @@ The agent doesn't run arbitrary code: the gateway validates, sandboxes, audits, 
 | Extensible guardrails without touching domain | `Guardrail` interface + `LocalGuardrail` (regex/PII) + `ExternalClassifier` adapter + `CompositeGuardrail` merge |
 | Model fallback with cost control | Provider port + `FallbackChain` (bounded retry + circuit breaker) + versioned `PricingService` + pre/post cost tracking |
 | Tools isolated from host and other tenants | `ToolExecutor` port + `WasmExecutor` (wazero) fuel/memory/time/FS/network limits + bounded loop + HITL gate |
+| Delegation without privilege widening | Parent→child grants with effective scope = parent ∩ granted (never widened), fail-closed middleware, generation-counter chain revocation, atomic Redis budget |
 | Observability without vendor lock-in | OpenTelemetry stdout + Prometheus `/metrics` + auto-provisioned Grafana + Loki/Promtail + Jaeger |
 | CI/CD with secure secrets | GitHub Actions + SOPS/age (`.env.enc` in repo) + canary deploy script + cosign signing |
 
@@ -308,8 +330,8 @@ The decision not to add premature infra is documented in `DECISIONS.md`. If a ta
 
 ## Conclusion
 
-agent-gateway proves that operating LLM agents at scale doesn't require "trusting no one cheats." It requires **zero-bypass architecture** (the middleware chain is the only way to reach the model), **structural isolation in the database** (RLS FORCE + composite PK, not a WHERE clause), **auditing that survives compromise** (per-tenant hash-chaining), and **reusable controls as domain services** (HITL, guardrails, routing, sandbox) — not scattered logic in handlers.
+agent-gateway proves that operating LLM agents at scale doesn't require "trusting no one cheats." It requires **zero-bypass architecture** (the middleware chain is the only way to reach the model), **structural isolation in the database** (RLS FORCE + composite PK, not a WHERE clause), **auditing that survives compromise** (per-tenant hash-chaining), and **reusable controls as domain services** (HITL, guardrails, routing, sandbox, secure agent-to-agent delegation) — not scattered logic in handlers.
 
-The lesson repeats itself: **an LLM isn't the place for security guarantees — it's the place for flexibility.** Routing is decided in the router, writes are governed by HITL, the tenant is isolated in the transaction context, guardrails live in a domain interface, and tools run in a sandbox. When every guarantee sits in a deterministic, testable layer, the system stays correct even when the model makes mistakes.
+The lesson repeats itself: **an LLM isn't the place for security guarantees — it's the place for flexibility.** Routing is decided in the router, writes are governed by HITL, the tenant is isolated in the transaction context, guardrails live in a domain interface, tools run in a sandbox, and delegation intersects scopes — never widens them. When every guarantee sits in a deterministic, testable layer, the system stays correct even when the model makes mistakes.
 
-The code is open at [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) with green CI, bilingual docs, OpenAPI 3.1, 14 migrations (0001_extensions through 0014_pricing_tables), and an 8-phase roadmap completed — from Foundation through CI/CD + Observability.
+The code is open at [github.com/ezequielranieri/agent-gateway](https://github.com/ezequielranieri/agent-gateway) with green CI, bilingual docs, OpenAPI 3.1, 17 migrations (0001_extensions through 0017_delegation_grants_generation), and a 9-phase roadmap completed — from Foundation through Secure Agent Delegation.

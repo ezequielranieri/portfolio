@@ -82,6 +82,13 @@ const MANUAL_OVERRIDES: Record<string, Override> = {
     },
     stack: ["Go", "YAML", "LLM", "Evaluation"],
   },
+  "aegis": {
+    description: {
+      en: "Secure WebAssembly execution in Rust: capability-based host functions (deny by default), Ed25519 + BLAKE3 signed hash-chained execution receipts, two-phase prepare/commit execution, fuel metering, hard sandbox limits, and a mutual-TLS gRPC server.",
+      es: "Ejecución segura de WebAssembly en Rust: host functions por capability (deny by default), receipts firmados Ed25519 + BLAKE3 con hash-chaining, ejecución en dos fases prepare/commit, fuel metering, límites duros de sandbox, y un server gRPC con mTLS.",
+    },
+    stack: ["Rust", "WebAssembly", "Wasmtime", "gRPC", "mTLS"],
+  },
 };
 
 const DEFAULT_REPOS = Object.keys(MANUAL_OVERRIDES);

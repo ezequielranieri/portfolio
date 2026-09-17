@@ -24,13 +24,13 @@ cover: ''
 
 Cuando empecé aegis, el problema era concreto: ejecutar código que no controlo requiere que cada acceso a un recurso esté controlado y que cada efecto secundario sea demostrable. Un sandbox por sí solo no alcanza — el sandbox te protege de lo que el guest no debería poder hacer, pero no te dice qué hizo.
 
-> **Estado actual: Fase 9 (two-phase receipts) implementada** — `cargo test` verde (160 tests), `cargo clippy --all-targets -- -D warnings` limpio, `cargo fmt --check` limpio. Runtime con **capability-based host functions**, **receipts Ed25519 + BLAKE3 hash-chained**, **ejecución en dos fases (prepare/commit/abort)**, **fuel metering**, y **gRPC con mTLS obligatorio**. CI verde en GitHub.
+> **Estado actual: Fase 9 (two-phase receipts) implementada** — `cargo test` verde (160 tests), `cargo clippy --all-targets -- -D warnings` limpio, `cargo fmt --check` limpio. Runtime con **capability-based host functions**, **receipts Ed25519 + BLAKE3 hash-chained**, **ejecución en dos fases (prepare/commit/abort)**, **fuel metering**, y **gRPC con mTLS configurable (validación CN/SAN)**. CI verde en GitHub.
 
 1. **¿Cómo garantizás que el guest solo toque lo que se le autorizó?** Si el modelo es "el código corre en un sandbox", un syscall de más se convierte en un dilema de auditoría: ¿quién autorizó ese archivo?
 2. **¿Cómo probás qué se ejecutó y qué costó?** "El WASM corrió bien" no es evidencia. Necesitás un recibo firmado que demuestre qué ejecutó, con qué resultado y a qué costo — verificable sin conexión al runtime.
 3. **¿Cómo separás la intención del resultado?** Una ejecución que falla a mitad de camino deja al sistema ambivalente: ¿se intentó, se completó, o algo de eso? La ejecución en dos fases convierte la ambigüedad en un protocolo.
 
-La tentación era la clásica: "corro el guest en Wasmtime y listo". Eso te da aislamiento de memoria, pero no te da una política. La respuesta fue combinar **host functions por capability** (deny by default, cada capacidad declara su alcance exacto), **receipts firmados con hash-chaining por ejecución**, **ejecución en dos fases** (un recibo de `prepare` antes de correr, un recibo de `commit` o `abort` después), **límites duros** (memoria, fuel, epoch interruption) y **mTLS obligatorio** en el borde gRPC — todo en un solo binario Rust sobre Wasmtime.
+La tentación era la clásica: "corro el guest en Wasmtime y listo". Eso te da aislamiento de memoria, pero no te da una política. La respuesta fue combinar **host functions por capability** (deny by default, cada capacidad declara su alcance exacto), **receipts firmados con hash-chaining por ejecución**, **ejecución en dos fases** (un recibo de `prepare` antes de correr, un recibo de `commit` o `abort` después), **límites duros** (memoria, fuel, epoch interruption) y **mTLS configurable** en el borde gRPC — en dos binarios Rust: `aegis-runtime` (server gRPC) y `aegis-verify` (verificador offline de cadenas de receipts).
 
 ## El problema de confiar en "el sandbox me protege"
 
@@ -42,7 +42,7 @@ El error clásico no es un ataque sofisticado: es una capability ancha. Darle al
 
 ### 1. Host functions por capability, no WASI
 
-WASI da acceso amplio y genérico. aegis no expone WASI: cada guest recibe **exactamente** las capacidades declaradas en su `PolicyConfig` — `filesystem.read`, `filesystem.write`, `network.http` — y nada más. Cada capacidad además viene acotada:
+WASI da acceso amplio y genérico. aegis no expone WASI: hay cuatro nombres de capability — `filesystem.read`, `filesystem.write`, `network.http`, `two_phase_receipts` — y cada guest recibe **exactamente** los que declara su `PolicyConfig` — y nada más. Solo los tres primeros son ejecutables: `two_phase_receipts` es un marcador que habilita los RPC de dos fases (`ExecutePrepare`/`ExecuteCommit`/`ExecuteAbort`), no una capability ejecutable, y el handler la rechaza como tal. Cada capacidad además viene acotada:
 
 - `filesystem.read` con un `allowed_root`: el guest solo lee bajo ese directorio.
 - `network.http` con allowlists de host y método: el guest solo llama adonde la política permite.
@@ -73,9 +73,9 @@ El sandbox de Wasmtime viene acotado desde la base: **1 MiB de memoria**, 1024 e
 
 Son complementarios: el epoch corta, el fuel cuenta. Y `fuel_budget` y `max_concurrent` son configurables por TOML, declarativamente.
 
-### 5. mTLS obligatorio en el borde gRPC
+### 5. mTLS configurable con validación de identidad en el borde gRPC
 
-El server gRPC exige que el cliente presente un certificado firmado por una CA configurada, con `CN`/`SAN` coincidiendo con la identidad esperada. **No existe modo sin TLS** — no hay flag que lo desactive. Si el certificado no matchea, la conexión no se establece, y punto.
+El server gRPC soporta mTLS configurable: cuando `server.tls` está presente, exige que el cliente presente un certificado firmado por la CA configurada con `CN`/`SAN` que coincida con `expected_identity` — si no matchea, la conexión no se establece. Sin configuración TLS, el server arranca igual, con una advertencia y conexiones sin cifrar (no apto para producción).
 
 ### 6. Verificación offline, arquitectura declarativa
 
@@ -102,7 +102,7 @@ La moraleja es la de siempre: un test flaky casi nunca es el test. Es un bug de 
 - **Evidencia verificable**: los receipts firmados y encadenados convierten la ejecución en un hecho demostrable, no en una promesa.
 - **Protocolo en vez de ambigüedad**: dos fases significa que la intención y el resultado son ambos auditables.
 - **Límites duros desde la base**: memoria, instancias, fuel y epoch no son configurables "por si acaso", son el default.
-- **mTLS sin modo inseguro**: no existe el botón "andá sin TLS por ahora".
+- **mTLS con identidad verificada**: cuando está configurado, el certificado del cliente debe matchear la identidad esperada; sin configuración TLS, el server no arranca en silencio — lo advierte.
 
 ## Lo que conscientemente dejé fuera
 
